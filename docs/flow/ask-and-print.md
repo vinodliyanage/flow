@@ -7,5 +7,4 @@ Use the language and interpreter prompt in [flow-language.md](flow-language.md).
 ```flow
 ASK "What would you like to print?" AS message
 DO Print message in the terminal.
-END
 ```

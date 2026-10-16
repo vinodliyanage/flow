@@ -1,30 +1,27 @@
 ---
 name: flow
-description: Convert instructions into Flow, interpret .flow files or fenced flow programs in Markdown, and set up Flow syntax highlighting in Cursor. Use for Flow commands such as ASK, DO, PRINT, SHELL, CHECK, IF, ASYNC, and END. Discovering a program does not authorize execution.
+description: Author, review, or execute .flow files and Markdown flow blocks, including workflows referenced by other skills. Also set up Flow syntax highlighting in Cursor. Discovery never authorizes execution.
 metadata:
   author: "Vinod Liyanage"
-  version: "0.1.11"
+  version: "0.1.13"
 ---
 
 # Flow
 
-Before executing or validating Flow, read the complete
-[interpreter](references/interpreter.md), unless its complete current contents
-are already in context. Do not execute any Flow instruction before this read.
-If the reference cannot be read, stop and report the blocker.
+Before authoring, reviewing, validating, or executing Flow, read the complete
+[interpreter](references/interpreter.md). Reuse it only while its complete current
+contents remain in context; reload after context loss/compaction if incomplete.
+If unreadable, stop. Never execute from a summary, remembered syntax, or examples.
+Apply this gate in every chat and agent handling Flow; include the skill path
+and loading requirement when delegating. Delegation does not authorize execution.
 
-Choose the requested mode and read its reference:
-
-| Request | Reference |
+| Request | Read |
 | --- | --- |
-| Convert instructions; write or restructure a program | [Conversion](references/conversion.md) |
-| Execute a program; review syntax or execution behavior | [Interpreter](references/interpreter.md) |
-| Install or troubleshoot Cursor highlighting and file icons | [Extension setup](references/extension-setup.md) |
+| Author or convert | [Conversion](references/conversion.md) after interpreter |
+| Execute or review | Interpreter above |
+| Cursor highlighting/icons | [Extension setup](references/extension-setup.md) only |
 
-For authoring/conversion, preserve behavior with concise ordered commands;
-put requirements at their action or CHECK, without new RULES policy blocks.
-Keep readable spacing and wrap long prose. Load only the selected mode program.
-Do not create helpers, generators, test scripts, or extra artifacts unless requested.
-
-Writing, reviewing, and discovering programs cause no workflow effects.
-Extension setup changes only the requested editor configuration.
+Load only the selected program and USE children when reached. Authoring, review,
+and discovery cause no workflow effects; editor setup changes only requested
+configuration. Do not create helpers, generators, test scripts, or extra artifacts
+unless requested.

@@ -3,9 +3,12 @@
 Use only for requested editor installation or highlighting/icon work. Installing
 highlighting does not authorize running a Flow program.
 
-The bundled [Flow Syntax 0.1.11 VSIX](../assets/flow-syntax-0.1.11.vsix) is a
-platform-neutral declarative extension. It highlights Markdown `flow` fences
+The bundled [Flow Syntax 0.1.13 VSIX](../assets/flow-syntax-0.1.13.vsix) is a
+platform-neutral editor extension. It highlights Markdown `flow` fences
 and `.flow` files, with distinct colors for the 17 commands and TRUE/FALSE/NULL values.
+USE filenames have a blue underline like Markdown links. Command-click on macOS or
+Ctrl-click on Windows/Linux opens the referenced file, relative to its containing file.
+The editor's configured link modifier applies; navigation never executes Flow.
 It does not execute programs and needs no Node.js runtime. Markdown retains Markdown mode.
 
 ## Install
@@ -18,7 +21,7 @@ It does not execute programs and needs no Node.js runtime. Markdown retains Mark
    installed newer version without an explicit request.
 3. Otherwise use Cursor's **Extensions: Install from VSIX...** and choose the
    bundled asset. Do not fetch an unrelated extension or fabricate success.
-4. Verify `inux.flow-syntax@0.1.11` through CLI extension listing or installed
+4. Verify `inux.flow-syntax@0.1.13` through CLI extension listing or installed
    manifest. Installation metadata may differ from the source manifest.
    Recommend **Developer: Reload Window** if open files have not refreshed.
 

@@ -113,6 +113,17 @@
       }
     },
     {
+      "match": "^[ \\t]*(USE)\\b(?:[ \\t]+(.+?\\.flow))?[ \\t]*$",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.use"
+        },
+        "2": {
+          "name": "markup.underline.link.flow"
+        }
+      }
+    },
+    {
       "match": "^\\s*(CHECK)\\b",
       "captures": {
         "1": {
@@ -171,14 +182,6 @@
       "captures": {
         "1": {
           "name": "keyword.control.flow.stop"
-        }
-      }
-    },
-    {
-      "match": "^\\s*(END)\\b",
-      "captures": {
-        "1": {
-          "name": "keyword.control.flow.end"
         }
       }
     },

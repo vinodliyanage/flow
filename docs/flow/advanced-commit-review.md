@@ -57,7 +57,7 @@ IF accepted == 3:
 ELSE:
     DO Print "Some subjects need revision." in the terminal.
 
-END with reviewed and accepted counts.
+PRINT with reviewed and accepted counts.
 ```
 
 ## Try these inputs

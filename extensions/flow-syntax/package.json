@@ -1,8 +1,8 @@
 {
   "name": "flow-syntax",
   "displayName": "Flow Syntax",
-  "description": "Highlight Flow instructions in Markdown flow blocks and .flow files.",
-  "version": "0.1.11",
+  "description": "Highlight Flow instructions and open referenced Flow files from Markdown or .flow files.",
+  "version": "0.1.13",
   "publisher": "inux",
   "private": true,
   "license": "UNLICENSED",
@@ -118,6 +118,21 @@
             }
           },
           {
+            "name": "Flow: USE",
+            "scope": "keyword.control.flow.use",
+            "settings": {
+              "foreground": "#7DCFFF"
+            }
+          },
+          {
+            "name": "Flow: referenced file",
+            "scope": "markup.underline.link.flow",
+            "settings": {
+              "foreground": "#61AFEF",
+              "fontStyle": "underline"
+            }
+          },
+          {
             "name": "Flow: CHECK",
             "scope": "keyword.control.flow.check",
             "settings": {
@@ -167,13 +182,6 @@
             }
           },
           {
-            "name": "Flow: END",
-            "scope": "keyword.control.flow.end",
-            "settings": {
-              "foreground": "#89DDFF"
-            }
-          },
-          {
             "name": "Flow: TRUE",
             "scope": "constant.language.flow.true",
             "settings": {
@@ -204,5 +212,13 @@
         ]
       }
     }
-  }
+  },
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:inux-flow",
+    "onLanguage:markdown"
+  ],
+  "extensionKind": [
+    "workspace"
+  ]
 }

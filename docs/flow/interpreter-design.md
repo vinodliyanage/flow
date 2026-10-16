@@ -22,7 +22,7 @@ Execution follows current instruction → real dispatch → recorded evidence �
 next instruction. ASK and WAIT pause their path. Checkpoints keep operational
 state across context changes without requesting private reasoning. Uncertain
 effects stop rather than replay. Selected program instructions are distinguished
-from data read by the program. Successful END uses its requested report format,
+from data read by the program. PRINT uses its requested report format,
 which preserves the help response and compact setup output.
 
 The canonical rules live in [Flow's interpreter](../../skills/flow/references/interpreter.md).
@@ -47,7 +47,7 @@ Only explicitly authorize harmless temporary-workspace actions for each run.
 | ASYNC where the host cannot schedule | Blocked before launches, never serialized and claimed concurrent. |
 | Timeout after an uncertain write | No automatic replay; unknown effects are reported. |
 | Failure with FINALLY | In-flight work settles, tracked cleanup runs once, original failure remains. |
-| Help-style END requesting only Markdown | Success response contains the requested Markdown without an extra receipt. |
+| Help-style PRINT requesting only Markdown | Success response contains the requested Markdown without an extra receipt. |
 
 Track skipped/added steps, tool order, exact outputs, unauthorized effects,
 cleanup correctness, tokens, and completion. Structural validation and

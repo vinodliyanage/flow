@@ -32,13 +32,13 @@ remain available; script paths resolve from the selected program file's folder.
 | `PRINT` | Display a value or indented literal Markdown in chat. | `PRINT message` or bare `PRINT` with a text body |
 | `SHELL` | Execute a command in the host shell. | ``SHELL `git --version` AS version`` |
 | `RUN` | Execute a direct process, inline code block, or script file. | See command and code forms below. |
+| `USE` | Run another .flow synchronously, then resume. | `USE ts-generate.flow` |
 | `CHECK` | Verify a condition; stop if false or unverifiable. | `CHECK reviewed == 3` |
 | `IF` / `ELSE` | Execute only the selected branch. | `IF accepted == 3:` |
 | `REPEAT` | Repeat a block a bounded number of times. | `REPEAT 3 TIMES:` |
 | `ASYNC` | Start a named background task and continue the main flow. | `ASYNC github_setup:` |
 | `WAIT` | Wait until a named task finishes successfully. | `WAIT github_setup` |
 | `STOP` | End the entire run early with a reason. | `STOP "Cancelled by the user."` |
-| `END` | Finish the flow and report its result. | `END with the PR link.` |
 
 ## Indentation
 
@@ -49,7 +49,7 @@ unexpected increases, empty bodies, and obsolete named closing commands are
 syntax errors. Blank lines and # comments do not change scope outside literal text.
 A bare PRINT introduces a literal text body without a colon; see Chat output.
 
-Long DO, natural-language CHECK, and END arguments may continue on immediately
+Long DO, natural-language CHECK, and PRINT with arguments may continue on immediately
 following lines indented four spaces beyond the instruction. Join continuation
 lines with one space; they remain one instruction, not a nested command block.
 Use no blank separators within an instruction. Do not split expressions, quoted
@@ -64,7 +64,7 @@ DO Review the affected code and direct dependencies to explain the implementatio
 CHECK The summary agrees with the reviewed implementation and the observed
     verification results.
 
-END with the saved file path and any material unresolved assumptions.
+PRINT with the saved file path and any material unresolved assumptions.
 ```
 
 ELSE: aligns with its matching IF and must immediately follow that IF's body,
@@ -72,8 +72,46 @@ ignoring blank lines/comments. Allow one ELSE per IF. RULES and THINK bodies are
 uniformly indented prose, without nested commands or blocks. Attached js fences
 align with their RUN; preserve code-relative indentation inside the fence.
 
-Final END remains at the top level and must be the last instruction; it finishes
-the flow, not an individual block. `END with the PR link.` specifies its report.
+The file or selected Markdown block finishes when its instructions run out. At EOF,
+join its tasks and run FINALLY; a USE child then returns to its caller. Use PRINT for
+output. EOF adds no automatic success message; failures and cleanup errors are reported.
+
+## Reusing flows
+
+USE executes another `.flow` file when the instruction is reached:
+
+```flow
+IF mode == "generate":
+    USE ts-generate.flow
+
+IF mode == "improve":
+    USE ts-improve.flow
+
+IF mode == "publish":
+    USE ts-publish.flow
+
+```
+
+This router assumes mode was resolved earlier. USE takes the rest of its line as one
+literal .flow path, without wrapping quotes. Trim surrounding whitespace; spaces
+within the path are literal. Paths are relative to the containing file or absolute;
+USE has no AS or variable form.
+Read and validate only the selected child when reached. After its instructions, tasks,
+and cleanup succeed, EOF returns to the caller. Named bindings are shared, so child
+updates remain available. Child references resolve from its own
+folder, and the host working directory stays unchanged.
+
+Caller rules apply to child work and cleanup; child RULES and FINALLY belong to that
+invocation. A missing file, invalid child, STOP, or execution/cleanup failure stops the
+whole run. Unwind cleanup from child to caller, retaining the failing file/line, call
+stack, known effects, and cleanup errors. Child preflight failure runs no child cleanup;
+already-started callers still clean up. Reject a canonical path already on the active
+call stack. USE cannot occur in ASYNC or FINALLY, and children share the root's
+1,000-instruction budget and authorization. USE does not grant additional permissions.
+Caller EOF adds no duplicate receipt after a child's PRINT.
+
+Ordinary Markdown references still supply guidance when explicitly read. Mentioning
+or discovering another flow does not execute it.
 
 ## Rules and cleanup
 
@@ -90,7 +128,6 @@ FINALLY:
     IF temp != NULL:
         DO Remove only temp and report cleanup errors.
 
-END
 ```
 
 RULES and FINALLY are optional top-level declarations, at most one of each per
@@ -100,13 +137,13 @@ plain-English constraints, not executable commands or nested blocks. Apply them
 to every main-flow, task, and cleanup action. Stop on a conflict with higher
 instructions or an action that cannot satisfy an applicable requirement.
 
-FINALLY contains synchronous cleanup instructions. Run it once after normal END,
+FINALLY contains synchronous cleanup instructions. Run it once at EOF,
 STOP, or an execution failure/blocker, after in-flight operations settle. Preflight
 failure starts no work and runs no cleanup. Use the main flow's last available
 variables and execution evidence, including known task effects; initialize optional
 resources before effects and guard cleanup when they were never created.
 
-FINALLY cannot contain ASK, ASYNC, WAIT, STOP, final END, RULES, or nested FINALLY.
+FINALLY cannot contain ASK, ASYNC, WAIT, USE, STOP, RULES, or nested FINALLY.
 It may use synchronous actions and IF/REPEAT/THINK blocks. Its direct children
 are cleanup steps: if one fails, stop that step and its descendants, record the
 error, and continue remaining independent cleanup steps. Do not resume the main
@@ -114,9 +151,9 @@ flow. Keep the original failure; cleanup errors prevent otherwise successful
 completion and are included in the final receipt. Cleanup never overrides host
 permissions or direct user restrictions.
 
-END's requested report is emitted after cleanup, including any cleanup failures.
-Keep only interpreter selection and release-tool metadata outside the fence;
-use SET for values, RULES for ongoing constraints, and END for report format.
+PRINT emits only observed results; do not claim pending tasks or cleanup succeeded.
+EOF still reports cleanup failures. Keep interpreter selection and release-tool metadata
+outside the fence; use SET for values, RULES for constraints, and PRINT for output.
 
 ## Values and conditions
 
@@ -167,13 +204,14 @@ Terminal output remains an explicit DO or SHELL action.
 ```flow
 ASK "What would you like to display?" AS message
 PRINT message
-END
 ```
 
-END without a requested result adds no redundant receipt after PRINT supplied
-the intended output. END with a requested result still reports that result;
-do not duplicate previously printed content. Failures and cleanup errors are
-reported regardless of prior PRINT output.
+PRINT does not finish the flow or agent turn; execute remaining instructions and EOF
+cleanup. EOF adds no redundant receipt; failures and cleanup errors are always reported.
+
+`PRINT with report_request` composes a report from already observed results, such as
+`PRINT with the saved path and material gaps, briefly.` It performs no tool calls or
+workflow effects. Literal text and expression forms remain available.
 
 For a fixed response, use bare PRINT without a colon:
 
@@ -184,7 +222,6 @@ PRINT
     | Command | Purpose |
     | --- | --- |
     | `/inux help` | Show commands. |
-END
 ```
 
 The nonempty body is literal Markdown, not Flow instructions. Strip exactly
@@ -209,7 +246,6 @@ SET response = """
 | ASK | Obtain input. |
 """
 PRINT response
-END
 ```
 
 The opening delimiter ends the SET line; the closing delimiter is alone on a
@@ -234,7 +270,7 @@ ASYNC git_check:
 DO Print "Checking tools..." in the terminal.
 WAIT node_check
 WAIT git_check
-END with both task results.
+PRINT with both task results.
 ```
 
 ASYNC launches its indented body as one task. Dedenting closes the task
@@ -245,7 +281,7 @@ Other tasks can keep running while the main flow waits.
 
 Task names must be unique and distinct from variable names. For now, ASYNC
 blocks appear only at the top level; their bodies may contain IF, REPEAT, and
-THINK, but not nested ASYNC, WAIT, ASK, RULES, FINALLY, or a final END.
+THINK, but not nested ASYNC, WAIT, ASK, USE, RULES, or FINALLY.
 
 Each task receives a copy of the variables available when it starts. Its writes
 stay local, so the two `version` outputs above do not conflict. The task handle
@@ -261,8 +297,8 @@ shared across the main flow and all tasks, not multiplied per task.
 A failed task stops scheduling further instructions once its failure is known.
 A failed WAIT never permits dependent work. Let in-flight operations settle
 safely, execute registered FINALLY cleanup once, and report partial completion; do not replay
-or automatically roll back actions. STOP also stops the whole run. Final END
-waits for outstanding tasks, executes FINALLY, and succeeds only if tasks and cleanup succeeded.
+or automatically roll back actions. STOP also stops the whole run. EOF waits for
+outstanding tasks and runs FINALLY; success requires successful tasks and cleanup.
 
 This requires a host that supports background execution or a scheduler able
 to interleave task instructions while tools run. Track real job/session handles.
@@ -279,7 +315,6 @@ THINK AS recommendation:
     Consider problem and identify the smallest useful next step.
     Give a brief recommendation and mention any material uncertainty.
 DO Print recommendation in the terminal.
-END
 ```
 
 THINK takes an indented prose body ending at the next dedent. AS is optional; without it,
@@ -301,7 +336,6 @@ factual requirement before acting on the conclusion.
 
 ```flow
 SHELL `node --version` AS runtime
-END
 ```
 
 SHELL selects the host shell: POSIX on Unix or PowerShell on Windows.
@@ -326,7 +360,7 @@ Supply `acli` as the private absolute executable path and `ticket_id` as a strin
 SHELL `{acli} jira workitem view {ticket_id} --fields key,issuetype,summary,status,assignee,description,attachment --json` AS response
 SET ticket = JSON(stdout of response)
 CHECK key of ticket == ticket_id
-END with ticket.
+PRINT with ticket.
 ```
 
 The instruction is portable across host shells for executables supporting the
@@ -357,7 +391,6 @@ RUN JavaScript using Node.js AS greeting
 const vars = JSON.parse(process.env.FLOW_VARS);
 console.log("Hello, " + vars.name);
 ```
-END
 ````
 
 The code fence belongs to the preceding RUN; together they form one instruction.
@@ -373,7 +406,6 @@ Alternatively, reference a JavaScript file:
 
 ```flow
 RUN "check-commit-subject.js" using Node.js AS validation
-END
 ```
 
 Resolve a relative file path against the folder containing the selected
@@ -396,7 +428,6 @@ judgment within its stated task; it cannot change program control flow.
 ```flow
 ASK "What would you like to print?" AS message
 DO Print message in the terminal.
-END
 ```
 
 ## Flow: Publish draft PR
@@ -417,7 +448,7 @@ CHECK No open PR already exists for this head and base.
 CHECK The local branch and HEAD are unchanged, the GitHub head matches head, and the GitHub base is unchanged since validation.
 DO Publish a draft PR using gh with the supplied repository, base, title, and body and branch as the head branch.
 CHECK The published PR is open, is a draft, targets the supplied base, and contains head as its HEAD commit.
-END with the PR link.
+PRINT with the PR link.
 ```
 
 For publication, use explicit `gh pr create --repo`, `--base`, `--head`,
