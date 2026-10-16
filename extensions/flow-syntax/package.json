@@ -1,0 +1,208 @@
+{
+  "name": "flow-syntax",
+  "displayName": "Flow Syntax",
+  "description": "Highlight Flow instructions in Markdown flow blocks and .flow files.",
+  "version": "0.1.11",
+  "publisher": "inux",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "flow",
+    "markdown",
+    "syntax"
+  ],
+  "scripts": {
+    "package": "vsce package --no-dependencies --allow-missing-repository --skip-license"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "2.32.0"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "inux-flow",
+        "aliases": [
+          "Flow",
+          "flow"
+        ],
+        "extensions": [
+          ".flow"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "inux-flow",
+        "scopeName": "source.inux-flow",
+        "path": "./syntaxes/flow.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.javascript": "javascript"
+        }
+      },
+      {
+        "scopeName": "markdown.inux-flow",
+        "path": "./syntaxes/flow-markdown.tmLanguage.json",
+        "injectTo": [
+          "text.html.markdown"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.inux-flow": "inux-flow",
+          "meta.embedded.block.javascript": "javascript"
+        }
+      }
+    ],
+    "configurationDefaults": {
+      "editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "name": "Flow: ASK",
+            "scope": "keyword.control.flow.ask",
+            "settings": {
+              "foreground": "#56B6C2"
+            }
+          },
+          {
+            "name": "Flow: SET",
+            "scope": "keyword.control.flow.set",
+            "settings": {
+              "foreground": "#E5C07B"
+            }
+          },
+          {
+            "name": "Flow: RULES",
+            "scope": "keyword.control.flow.rules",
+            "settings": {
+              "foreground": "#C8A2C8"
+            }
+          },
+          {
+            "name": "Flow: FINALLY",
+            "scope": "keyword.control.flow.finally",
+            "settings": {
+              "foreground": "#DBBFA8"
+            }
+          },
+          {
+            "name": "Flow: THINK",
+            "scope": "keyword.control.flow.think",
+            "settings": {
+              "foreground": "#C099FF"
+            }
+          },
+          {
+            "name": "Flow: DO",
+            "scope": "keyword.control.flow.do",
+            "settings": {
+              "foreground": "#61AFEF"
+            }
+          },
+          {
+            "name": "Flow: SHELL",
+            "scope": "keyword.control.flow.shell",
+            "settings": {
+              "foreground": "#D19A66"
+            }
+          },
+          {
+            "name": "Flow: RUN",
+            "scope": "keyword.control.flow.run",
+            "settings": {
+              "foreground": "#C678DD"
+            }
+          },
+          {
+            "name": "Flow: CHECK",
+            "scope": "keyword.control.flow.check",
+            "settings": {
+              "foreground": "#98C379"
+            }
+          },
+          {
+            "name": "Flow: IF",
+            "scope": "keyword.control.flow.if",
+            "settings": {
+              "foreground": "#E06C75"
+            }
+          },
+          {
+            "name": "Flow: ELSE",
+            "scope": "keyword.control.flow.else",
+            "settings": {
+              "foreground": "#E9967A"
+            }
+          },
+          {
+            "name": "Flow: REPEAT",
+            "scope": "keyword.control.flow.repeat",
+            "settings": {
+              "foreground": "#FF79C6"
+            }
+          },
+          {
+            "name": "Flow: ASYNC",
+            "scope": "keyword.control.flow.async",
+            "settings": {
+              "foreground": "#7E9CD8"
+            }
+          },
+          {
+            "name": "Flow: WAIT",
+            "scope": "keyword.control.flow.wait",
+            "settings": {
+              "foreground": "#73DACA"
+            }
+          },
+          {
+            "name": "Flow: STOP",
+            "scope": "keyword.control.flow.stop",
+            "settings": {
+              "foreground": "#FF5370"
+            }
+          },
+          {
+            "name": "Flow: END",
+            "scope": "keyword.control.flow.end",
+            "settings": {
+              "foreground": "#89DDFF"
+            }
+          },
+          {
+            "name": "Flow: TRUE",
+            "scope": "constant.language.flow.true",
+            "settings": {
+              "foreground": "#A8E6A1"
+            }
+          },
+          {
+            "name": "Flow: FALSE",
+            "scope": "constant.language.flow.false",
+            "settings": {
+              "foreground": "#FF8F9C"
+            }
+          },
+          {
+            "name": "Flow: NULL",
+            "scope": "constant.language.flow.null",
+            "settings": {
+              "foreground": "#FFD580"
+            }
+          },
+          {
+            "name": "Flow: PRINT",
+            "scope": "keyword.control.flow.print",
+            "settings": {
+              "foreground": "#F0D060"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

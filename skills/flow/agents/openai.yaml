@@ -1,0 +1,6 @@
+interface:
+  display_name: "Flow Interpreter"
+  short_description: "Execute and review Flow instruction programs"
+  default_prompt: "Use $flow to execute the selected Flow program."
+policy:
+  allow_implicit_invocation: true
