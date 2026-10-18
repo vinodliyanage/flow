@@ -13,7 +13,9 @@ indentation, and USE file links in Cursor and VS Code.
 
 ## Documentation website
 
-The documentation is built with VitePress from the Markdown files in `docs/`.
+The documentation is published at
+[flow.vinodliyanage.me](https://flow.vinodliyanage.me) and built with VitePress
+from the Markdown files in `docs/`.
 
 ```sh
 npm install
