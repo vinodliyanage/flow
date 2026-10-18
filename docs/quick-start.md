@@ -9,13 +9,13 @@ In Cursor or VS Code, run **Extensions: Install from VSIX...** from the Command
 Palette. Choose:
 
 ```text
-extensions/flow/dist/flow-0.2.5.vsix
+extensions/flow/dist/flow-0.2.6.vsix
 ```
 
 You can also install it from a terminal:
 
 ```sh
-cursor --install-extension /absolute/path/to/extensions/flow/dist/flow-0.2.5.vsix
+cursor --install-extension /absolute/path/to/extensions/flow/dist/flow-0.2.6.vsix
 ```
 
 Reload the editor if an open file does not update. The extension highlights
