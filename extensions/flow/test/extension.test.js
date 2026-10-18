@@ -87,13 +87,17 @@ test('references, bindings, custom commands, JSON strings and Boolean operators 
   assert.ok(!hasScope(tokenize(flow, 'SET x = trim("x")')[0], 'support.function.flow'));
 });
 
-test('labels and references have explicit default colors', () => {
+test('labels, references, commands, and strings have explicit default colors', () => {
   const rules = read('package.json').contributes.configurationDefaults
     ['editor.tokenColorCustomizations'].textMateRules;
-  const colorFor = scope => rules.find(rule => rule.scope === scope)?.settings.foreground;
+  const colorFor = scope => rules.find(rule => rule.scope === scope ||
+    (Array.isArray(rule.scope) && rule.scope.includes(scope)))?.settings.foreground;
   assert.equal(colorFor('variable.other.flow'), '#9CDCFE');
   assert.equal(colorFor('variable.other.reference.flow'), '#9CDCFE');
   assert.equal(colorFor('entity.name.function.flow'), '#DCDCAA');
+  assert.equal(colorFor('string.quoted.double.flow'), '#98C379');
+  assert.equal(colorFor('string.quoted.triple.flow'), '#98C379');
+  assert.equal(colorFor('string.unquoted.block.flow'), '#98C379');
 });
 
 test('CONTEXT and RUN bodies stay literal, then normal highlighting resumes', () => {

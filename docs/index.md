@@ -15,6 +15,9 @@ hero:
     - theme: alt
       text: Why Flow?
       link: /flow-language
+    - theme: alt
+      text: See examples
+      link: /examples
 
 features:
   - title: Readable by design
@@ -37,5 +40,5 @@ PRINT @review
 ```
 
 Flow makes the route through a task inspectable before the task starts. Begin
-with the [quick start](quick-start.md), then use the [command reference](commands.md)
-while writing your own workflows.
+with the [quick start](quick-start.md), explore the [complete examples](examples.md),
+then use the [command reference](commands.md) while writing your own workflows.

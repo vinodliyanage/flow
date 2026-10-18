@@ -82,6 +82,7 @@ export default defineConfig({
     logo: '/icon.png',
     nav: [
       { text: 'Guide', link: '/quick-start' },
+      { text: 'Examples', link: '/examples' },
       { text: 'Commands', link: '/commands' },
     ],
     sidebar: [
@@ -90,6 +91,7 @@ export default defineConfig({
         items: [
           { text: 'Why Flow', link: '/flow-language' },
           { text: 'Quick start', link: '/quick-start' },
+          { text: 'Examples', link: '/examples' },
         ],
       },
       {
