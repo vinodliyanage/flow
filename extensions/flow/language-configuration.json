@@ -39,6 +39,7 @@
     }
   ],
   "indentationRules": {
-    "increaseIndentPattern": "^\\s*(?:IF\\b.*|ELSE|REPEAT\\b.*|ASYNC\\b.*|THINK\\b.*|RULES|FINALLY):\\s*$"
+    "increaseIndentPattern": "^ *(?!.*: *$)(?:(?:IF|WHILE|REPEAT|ASYNC|RUN)\\b.*|ELSE|CONTEXT) *$",
+    "decreaseIndentPattern": "^ *(?:ELSE|AS +[a-z][a-z0-9_]*) *$"
   }
 }

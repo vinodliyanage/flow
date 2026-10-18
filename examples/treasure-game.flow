@@ -1,0 +1,43 @@
+# A simple interactive Flow game.
+
+PRINT "Welcome to Treasure Island!"
+ASK "What is your name?" AS name
+
+PRINT "Hello, adventurer:"
+PRINT @name
+
+SET score = 0
+
+ASK "You reach a fork in the road. Choose exactly: forest or cave" AS path
+
+IF @path == "forest"
+    PRINT "You enter the forest and find a locked wooden chest."
+    SET score = @score + 1
+    ASK "Choose exactly: open or leave" AS forest_action
+    IF @forest_action == "open"
+        PRINT "A friendly owl gives you the key. You found the treasure!"
+        SET score = @score + 4
+    ELSE
+        PRINT "You leave safely, but the treasure remains hidden."
+ELSE
+    IF @path == "cave"
+        PRINT "You enter the cave and hear a sleeping dragon."
+        SET score = @score + 1
+        ASK "Choose exactly: sneak or run" AS cave_action
+        IF @cave_action == "sneak"
+            PRINT "You quietly pass the dragon and find a bag of gold!"
+            SET score = @score + 3
+        ELSE
+            PRINT "You escape safely before the dragon wakes up."
+    ELSE
+        PRINT "You chose an unknown path and returned home safely."
+
+PRINT "Game over. Your final score is:"
+PRINT @score
+
+IF @score >= 4
+    PRINT "You are a master treasure hunter!"
+ELSE
+    PRINT "Try again and choose a different path."
+
+RETURN "Thanks for playing Treasure Island!"

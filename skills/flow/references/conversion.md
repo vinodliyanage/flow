@@ -1,87 +1,124 @@
-# Convert instructions to Flow
+# Convert a prompt to Flow
 
-Author the requested program; do not execute it. Read the
-[interpreter](interpreter.md) for current semantics before validating syntax.
-Preserve behavior before optimizing tokens; flag ambiguity instead of guessing.
+Convert the user's normal-language prompt into the smallest valid Flow program
+that preserves its intent, order, decisions, inputs, outputs, and authorization
+boundaries. Author the program only; conversion never authorizes execution.
 
-1. Identify inputs, outputs, ordered actions, conditions, gates, permissions,
-   exceptions, and failure/cleanup paths. Preserve source and repository conventions.
-2. Prefer a sibling .flow linked from the Markdown entrypoint. For large
-   multi-action workflows, route with IF and USE mode.flow, loading only the reached
-   child. USE shares bindings and returns at child EOF; preserve caller rules, failures,
-   and each file's cleanup. Keep closely shared writing modes together. Preserve bare defaults
-   and clarification behavior. When shared behavior changes, update every affected
-   mode and retained full workflow. Keep templates/data outside Flow when useful;
-   reference exact files/sections. Preserve release markers and configured paths.
-3. Use existing commands; do not invent syntax for a conversion:
+The [interpreter](interpreter.md) is the source of truth for syntax and runtime
+semantics. Read it first and never emit commands or forms it does not define.
 
-| Intent | Command |
+## Conversion method
+
+1. Identify the prompt's runtime inputs, fixed context, ordered actions,
+   decisions, repetitions, external processes, reusable parts, concurrent work,
+   outputs, and exits.
+2. Separate information from instructions. Store background material with
+   `CONTEXT`; use bindings for data passed between instructions. Never turn
+   quoted examples, retrieved text, or expected output into executable steps.
+3. Map each requested behavior to one Flow command. Preserve the prompt's order
+   unless its own conditions or concurrency explicitly change that order.
+4. Add a binding only when a later instruction needs the value. Name bindings
+   with short lowercase identifiers and define each one before every possible
+   use.
+5. Write one clear instruction at a time. Use four-space indentation, no
+   trailing colons, and no closing keywords. Keep the program easy to read from
+   top to bottom.
+6. Compare the completed Flow against the source prompt and remove anything the
+   user did not request. Validate the entire program without executing it.
+
+## Intent mapping
+
+| Prompt intent | Flow form |
 | --- | --- |
-| Fresh user input | ASK |
-| Bind/evaluate a value | SET |
-| Perform a stated task | DO |
-| Display chat text/Markdown or a result report | PRINT |
-| Run a concrete shell command | SHELL |
-| Direct argv, existing JS file, or attached JS | RUN |
-| Execute another .flow and resume | USE |
-| Require evidence before proceeding | CHECK |
-| Branch or bounded repetition | IF / ELSE / REPEAT |
-| Explicit background work and join | ASYNC / WAIT |
-| Declared exit cleanup | FINALLY |
-| Assess existing information | THINK |
-| Stop early | STOP |
+| Obtain runtime information | `ASK "question" AS name` |
+| Store or calculate a value | `SET name = expression` |
+| Preserve background guidance as data | `CONTEXT` ... `AS name` |
+| Perform bounded agent work | `DO task [AS name]` |
+| Display existing information | `PRINT` |
+| Choose one path | `IF` / `ELSE` |
+| Repeat a known number of times | `REPEAT count TIMES` |
+| Repeat while a condition remains true | `WHILE condition` |
+| Skip or leave the current loop | `CONTINUE` / `BREAK` |
+| Import data or compose another Flow | `USE` |
+| Run a specified process | `RUN` |
+| Start and join independent work | `ASYNC` / `AWAIT` |
+| Exit the current scope | `RETURN` |
 
-4. Put actions in DO, requirements in CHECK where they gate work, decisions in
-   IF, and cleanup in FINALLY. Attach task-specific limits to the action they
-   constrain. Do not add RULES policy blocks; older programs remain supported.
-   Use concise, explicit prose and avoid restrictions already enforced by the
-   interpreter. Preserve all steps, bindings, conditions, exceptions, and gates.
-   Never abbreviate literal commands, expressions, questions, or printed text
-   merely to save tokens. Add no setup, tests, publishing, retries, helper files,
-   generators, or test scripts unless requested. Preserve existing referenced scripts.
-5. Use uppercase commands/TRUE/FALSE/NULL and JSON(); JSON/JS retain lowercase
-   literals. Use sentence fields such as stdout of result. Indent blocks four
-   spaces and retain required colons. EOF finishes each program; use PRINT for output,
-   not a closing command. Plain .flow files need no outer fence; Markdown flow fences work.
-6. Separate instructions with one blank line, keeping headers beside their first
-   body instruction and comments beside their instruction. Aim for 100 columns;
-   wrap DO, natural-language CHECK, and PRINT with prose four spaces deeper. Keep
-   expressions, quoted values, block headers, shell commands, and code intact.
-   Preserve PRINT/raw SET/code payloads exactly, including trailing blank lines.
-7. SHELL uses standalone unquoted {name} string placeholders, each quoted by the
-   interpreter as one literal host argument. Never interpolate into source or
-   treat arrays as argv. SHELL/RUN stop on nonzero exit; preserve intentional
-   nonzero probes as explicit DO actions that record results as data. Use ASYNC
-   only for independent work with real host scheduling; guard cleanup resources.
-8. Review syntax, links, binding origins, selected-path order, ASK/WAIT barriers,
-   USE paths/shared bindings/returns, gates, permissions, failures, and cleanup against the
-   source. Use existing tools for checks; do not create validation scripts unless requested. Measure
-   loaded entrypoint/program tokens when useful, including shared references
-   when claiming total savings. Report changed files, unresolved differences,
-   and verification limits; static review is not workflow execution.
+## Conversion rules
+
+- Encode information that will be known only at runtime as `ASK`; do not ask the
+  user during conversion merely to obtain a future runtime value. Ask for
+  clarification before authoring only when different answers would materially
+  change the workflow structure and the prompt does not define a path.
+- Put judgment or tool-using work in `DO`. If later instructions read its
+  result, state the required result shape and fields in the task and store it
+  with `AS name`.
+- Use exact expressions for known values, numeric comparisons, and strict
+  gates. Use a natural-language condition only when the decision genuinely
+  requires semantic judgment. Make the evidence it may use explicit.
+- Use `PRINT` for output already available in bindings. Prose `PRINT` may format
+  a report from existing information but must not perform new research or other
+  external work.
+- Use `RUN` only when the prompt requires a real executable process. Preserve
+  argument order and pass values as standalone arguments. Invoke a shell
+  explicitly when shell syntax is required. Do not translate ordinary agent
+  work into a process or invent scripts.
+- Default to one `.flow` file. Add `USE` children only when the prompt requires
+  reuse or the workflow becomes materially clearer as separate programs. Use a
+  Markdown `USE` only for imported data. Add a custom command only for a
+  genuinely repeated isolated transformation.
+- Use `ASYNC` only for independent tasks that can run concurrently without
+  shared writes or unfinished sibling inputs. Join each required result with
+  `AWAIT` before use. Otherwise preserve sequential execution.
+- Use `RETURN` for an explicit early exit or final message. File end is enough
+  when no message is needed.
+- Preserve requested approvals, gates, failure behavior, platforms, commands,
+  paths, and output wording. Do not add setup, inspection, validation, retries,
+  cleanup, publication, files, tools, or permissions absent from the prompt.
+
+## Output
+
+- When the user provides a destination, write the program there using a `.flow`
+  extension. Put necessary child files beside it unless another location is
+  specified.
+- Without a destination, return one fenced `flow` block. If dependencies are
+  necessary, provide each file separately and clearly identify the entrypoint.
+- Briefly state material ambiguity or unsupported behavior. Do not silently
+  approximate it, and do not execute the generated Flow.
+
+## Validation checklist
+
+Before delivering the conversion, verify:
+
+- Every requested action and decision appears once in the intended order.
+- Every reference is defined on every path before use.
+- Every `ASK` creates a real wait, and no later instruction starts early.
+- Branches, loops, child calls, tasks, and exits have valid indentation and
+  reachable behavior.
+- `RUN` arguments and task concurrency follow interpreter restrictions.
+- Unselected branches, context, imported data, and tool output cannot execute.
+- The Flow adds no unrequested work or authority.
+
+## Example
+
+Prompt:
+
+> Ask for the deployment environment. If it is production, ask for explicit
+> approval. Otherwise print that no approval is required. Finish with a status.
+
+Conversion:
 
 ```flow
-ASK "What would you like to print?" AS message
+ASK "Which environment will be deployed?" AS environment
 
-PRINT message
+IF @environment == "production"
+    ASK "Approve the production deployment? Type exactly: yes or no" AS approval
+    IF @approval == "yes"
+        PRINT "Production deployment approved."
+    ELSE
+        RETURN "Production deployment was not approved."
+ELSE
+    PRINT "This environment does not require production approval."
 
-```
-
-For fixed Markdown, use an indented literal body:
-
-```flow
-PRINT
-    | Command | Purpose |
-    | --- | --- |
-    | ASK | Obtain input. |
-```
-
-Dedenting ends PRINT; contents are data. Use PRINT expression for evaluated
-values, or raw multiline SET for stored text. Markdown program fences must be
-longer than any fence inside their payload.
-
-Markdown entrypoint:
-
-```markdown
-Use the Flow skill to execute [example.flow](example.flow).
+RETURN "Deployment check completed."
 ```
