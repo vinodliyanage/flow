@@ -1,0 +1,22 @@
+CONTEXT
+    Base the reply only on the supplied message and policy.
+    Do not invent refunds, delivery dates, product behavior, or commitments.
+    Keep the reply clear, considerate, and ready for a human to review.
+AS guidelines
+
+ASK "Paste the customer's message." AS message
+IF @message is an empty string
+    RETURN "A customer message is required."
+
+ASK "Paste the policy or product information relevant to this request." AS policy
+IF @policy is an empty string
+    RETURN "Relevant policy or product information is required."
+
+DO Assess @message using @policy and @guidelines. AS assessment
+
+IF @assessment requires a decision that @policy does not cover
+    PRINT Explain which decisions in @assessment need a human answer.
+    RETURN "A human decision is required before drafting a reply."
+
+DO Draft a customer reply using @message, @policy, @assessment, and @guidelines. AS reply
+PRINT @reply

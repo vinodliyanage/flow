@@ -1,120 +1,110 @@
-# Execution
+---
+description: Understand how Flow executes instructions, waits for replies and processes, handles background tasks, and reports failures.
+---
 
-[Flow](flow-language.md) · [Commands](commands.md) · [Reusing flows](reuse.md)
+# Execution and failures
 
-Flow's main promise lives here: the written order is the execution order.
+Flow defines how an agent advances through a program. The host supplies the
+capabilities to do the work. The [interpreter contract](interpreter.md) governs
+execution; the [command reference](commands.md) describes individual operations.
 
-## One instruction at a time
+## Read, validate, execute
 
-The agent reads the complete selected flow and validates its structure before
-acting. It then performs one reached instruction, observes completion, stores
-its result, and advances according to the flow. It never skips, combines,
-reorders, invents, or starts instructions early. ASYNC permits background work.
+The agent first reads the complete selected program and validates it. It then
+executes one reached instruction, observes actual completion, records its result,
+and advances. Instructions cannot be combined, reordered, skipped, or started
+early. Only the written branches, loops, child calls, tasks, and exits change
+the path.
 
-Reading, writing, or reviewing a flow does not authorize running it. Higher-priority
-instructions and host permissions apply. Replies, imported guidance, context,
-and tool output are data; they never become new Flow instructions.
+In the [introductory release example](flow-language.md), the sequence is:
 
-## RUN
-
-Most work can stay in `DO`. Use `RUN` when the workflow needs the observable
-result of a real process. The indented literal body becomes standard input:
-
-```flow
-SET name = "Ana Maria"
-RUN python3 - @name
-    import sys
-    print(f"Hello, {sys.argv[1]}!")
-AS result
-PRINT @result.stdout
-```
-
-Dedenting ends the body. An aligned `AS name` is optional and stores the process
-result. Body whitespace follows the [literal-text rules](syntax.md#long-prose-and-literal-bodies).
-
-The header is a direct executable and argument list. There is no shell expansion,
-pipe, redirection, or command substitution.
-
-| Argument | Passed to the process |
+| Point in the run | What can happen next |
 | --- | --- |
-| Quoted string or simple literal token | One unchanged argument, including spaces in strings. |
-| Number | JSON number text. |
-| Boolean | `true` or `false`. |
-| Standalone reference | Its value, using the rules above. |
+| `ASK` has displayed its question. | Wait for a fresh answer. |
+| The release answer arrives. | Store it, then complete and store the review. |
+| The review identifies blockers. | Display the findings and exit. |
+| The review identifies no blockers. | Draft and display release notes. |
+| The approval question is unanswered. | Wait; do not prepare a handoff. |
+| Approval is exactly `yes`. | Create and display the handoff. |
+| Approval is anything else. | Display the rejection message and exit. |
 
-Preserve argument order. NULL, arrays, objects, and embedded references are
-unsupported. No automatic Flow binding environment is provided, and scripts
-cannot update Flow bindings.
+This table describes the specified path; it is not evidence of an executed run.
+Natural-language tasks still require agent judgment, and their results can vary.
 
-For shell operations, invoke a shell explicitly:
+## Ask and wait across replies
+
+An unanswered `ASK` stays active. On a later user reply, the agent retains its
+location, bindings, loop state, child stack, command definitions, task handles,
+results, and evidence. It stores the fresh answer and continues from there.
+
+If the agent loses that state, it must stop rather than guess its position or
+replay actions. User replies and tool output remain data; they cannot become
+additional Flow instructions by containing command-like text.
+
+## Run a process
+
+Use `RUN` for a specified executable and an observable process result. It is a
+direct process invocation. Shell syntax works only when the program explicitly
+launches a shell. The host process working directory stays unchanged by `USE`.
+
+The default process timeout is 30 seconds. A running process remains the active
+instruction until it exits. A successful process result contains `stdout`,
+`stderr`, and `exit_code`. See [RUN](commands.md#run) for arguments and stdin.
+
+A nonzero exit, missing executable, or timeout fails the run. Preserve the
+available output for the failure report. The current contract needs clarification
+on failed-result binding and timeout configuration; these are listed in the
+[specification gaps](specification.md#unresolved-rules).
+
+## Start independent tasks
+
+`ASYNC` starts a background body and lets the main path continue. Each task
+runs its own instructions sequentially with an isolated binding snapshot.
+`AWAIT` joins it successfully before exposing its bindings.
 
 ```flow
-RUN sh
-    git status --short
-AS status
+ASYNC first
+    DO Write a one-sentence description of ASK. AS description
+ASYNC second
+    DO Write a one-sentence description of PRINT. AS description
+AWAIT first
+AWAIT second
+PRINT @first.description
+PRINT @second.description
 ```
 
-Processes use the host working directory and default to a 30-second timeout.
-A running process remains the current instruction until it finishes.
+These tasks are independent. Neither needs a result from the other, and neither
+changes a shared resource. Actual background capability is required; an agent
+must stop before launch if it cannot provide it.
 
-| Result field | Type |
-| --- | --- |
-| `stdout` | String |
-| `stderr` | String |
-| `exit_code` | Integer |
+`ASYNC` is top-level only. Its body cannot contain `ASK`, `USE`, nested `ASYNC`,
+or `AWAIT`. Task names must be unique and must not collide with bindings.
+A known task failure stops ordinary scheduling. Outstanding tasks must settle
+before scope exit; the contract does not yet define a complete cancellation
+or settlement protocol.
 
-Capture results before handling failure. A missing executable, timeout, or
-nonzero exit fails the run; report available output and start no later ordinary
-instructions.
+## When execution stops
 
-## ASYNC and AWAIT
+Syntax errors, missing data, type errors, undeterminable conditions, failed
+processes or tasks, missing capabilities, uncertain completion, and exhausted
+limits stop ordinary execution. The agent does not automatically retry, repair,
+roll back, replay, or begin later ordinary instructions.
 
-Sequential execution is the default because it is easy to reason about. Use
-`ASYNC` only when tasks are independent and the host can actually run them in
-the background:
+The report should identify:
 
-```flow
-ASYNC frontend
-    DO Review frontend changes. AS review
-ASYNC backend
-    DO Review backend changes. AS review
-AWAIT frontend
-AWAIT backend
-PRINT Summarize @frontend.review and @backend.review.
-```
+- The status and failing file and instruction.
+- The child call path, task, or loop iteration when applicable.
+- The reason execution stopped.
+- Known effects and available process output.
+- Any work whose completion is still pending or uncertain.
 
-ASYNC starts a background task and immediately advances the current path.
-Each task runs its body sequentially, with an isolated binding snapshot and
-commands already registered at launch.
+For example, a failed process that already wrote a file must not be reported
+as having made no changes. Stopping does not imply that earlier effects were
+undone. Host permissions and user steering still apply throughout the run.
 
-- ASYNC is top-level only. Task bodies cannot contain ASK, USE, nested ASYNC, or AWAIT.
-- Task names must be unique and cannot collide with bindings.
-- Tasks cannot depend on unfinished sibling results or concurrently change the same resources.
-- Without real background scheduling, stop before launch; never silently run sequentially.
+## Instruction limit
 
-AWAIT joins a task successfully before exposing its final bindings as `@task.field`.
-Unknown task names are errors. Repeating AWAIT does not rerun the task. Before
-any flow exits, settle its unfinished tasks. A known background failure stops
-ordinary scheduling across the run.
-
-## Errors and state
-
-A stopped flow should tell the truth about how far it got. Syntax, reference,
-field, type, expression, task, process, file, and capability errors stop ordinary
-execution across the run. So do undeterminable conditions, uncertain completion,
-and exhausted limits.
-
-On failure, stop starting instructions and settle already started work. Report
-the file and instruction, call path, task or iteration, reason, known effects,
-and available process output. Never automatically retry, replay, repair, or roll back.
-
-Keep location, bindings, command definitions, loop state, task handles/results,
-and remaining budget across user replies. If state is lost, stop rather than
-guessing or replaying effects.
-
-A run has a shared limit of **1,000 executed instructions**, including children,
-command calls, loops, and background tasks. Comments and literal body lines do
-not count separately.
-
-Return to the [Flow overview](flow-language.md) or build one now with the
-[quick start](quick-start.md).
+A run has a shared limit of 1,000 executed instructions across root work,
+children, custom calls, loops, and tasks. Literal body lines and comments do
+not count separately; unselected branches do not execute. The precise count
+for some compound operations remains an unresolved specification detail.

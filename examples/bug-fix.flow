@@ -1,0 +1,21 @@
+ASK "Describe the bug and how to reproduce it." AS report
+IF @report is an empty string
+    RETURN "A bug report is required."
+
+DO Investigate @report in the current project.
+    Record the evidence, likely cause, and any uncertainty. AS diagnosis
+
+IF @diagnosis cannot identify a cause supported by evidence
+    PRINT Explain what is missing from @diagnosis and what to investigate next.
+    RETURN "More evidence is needed before proposing a fix."
+
+DO Propose the smallest fix supported by @diagnosis. AS proposal
+PRINT @proposal
+
+ASK "Apply this fix? Type yes to approve." AS approval
+IF @approval is not exactly "yes"
+    RETURN "No fix was applied."
+
+DO Apply only the approved fix in @proposal. AS change
+DO Run the existing checks relevant to @change and record their actual results. AS verification
+PRINT Summarize @change and @verification, including any remaining gaps.

@@ -1,8 +1,12 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitepress'
+import { defineConfig, type HeadConfig } from 'vitepress'
 
 const extensionRoot = new URL('../../extensions/flow/', import.meta.url)
+const siteUrl = 'https://flow.vinodliyanage.me'
+const siteDescription = 'Turn traditional prompts into readable agent workflows with clear steps, English conditions, and explicit approval pauses.'
+const shareImage = `${siteUrl}/og-flow.png`
+const shareImageAlt = 'Flow: Turn prompts into clear workflows, with a plain-English release review and approval example.'
 
 const flowGrammar = JSON.parse(
   readFileSync(
@@ -62,8 +66,9 @@ const flowTheme = {
 export default defineConfig({
   lang: 'en-US',
   title: 'Flow',
-  description: 'A small language for giving agents a visible path through a task.',
+  description: siteDescription,
   base: '/',
+  srcExclude: ['_partials/**'],
   lastUpdated: true,
   vite: {
     publicDir: fileURLToPath(
@@ -74,6 +79,37 @@ export default defineConfig({
     ['link', { rel: 'icon', type: 'image/png', href: '/icon.png' }],
     ['meta', { name: 'theme-color', content: '#3157d5' }],
   ],
+  transformHead({ pageData }) {
+    if (pageData.relativePath === '404.md') return []
+
+    const isHome = pageData.relativePath === 'index.md'
+    const title = isHome
+      ? 'Flow — Turn prompts into clear workflows'
+      : `${pageData.title} | Flow`
+    const description = pageData.description || siteDescription
+    const pathname = isHome ? '/' : `/${pageData.relativePath.replace(/\.md$/, '.html')}`
+    const url = new URL(pathname, siteUrl).href
+
+    return [
+      ['link', { rel: 'canonical', href: url }],
+      ['meta', { property: 'og:type', content: 'website' }],
+      ['meta', { property: 'og:site_name', content: 'Flow' }],
+      ['meta', { property: 'og:locale', content: 'en_US' }],
+      ['meta', { property: 'og:title', content: title }],
+      ['meta', { property: 'og:description', content: description }],
+      ['meta', { property: 'og:url', content: url }],
+      ['meta', { property: 'og:image', content: shareImage }],
+      ['meta', { property: 'og:image:type', content: 'image/png' }],
+      ['meta', { property: 'og:image:width', content: '1200' }],
+      ['meta', { property: 'og:image:height', content: '630' }],
+      ['meta', { property: 'og:image:alt', content: shareImageAlt }],
+      ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+      ['meta', { name: 'twitter:title', content: title }],
+      ['meta', { name: 'twitter:description', content: description }],
+      ['meta', { name: 'twitter:image', content: shareImage }],
+      ['meta', { name: 'twitter:image:alt', content: shareImageAlt }],
+    ] satisfies HeadConfig[]
+  },
   markdown: {
     languages: [flowLanguage],
     theme: flowTheme,
@@ -81,26 +117,36 @@ export default defineConfig({
   themeConfig: {
     logo: '/icon.png',
     nav: [
-      { text: 'Guide', link: '/quick-start' },
+      { text: 'Learn', link: '/flow-language' },
+      { text: 'Reference', link: '/commands' },
+      { text: 'Specification', link: '/specification' },
       { text: 'Examples', link: '/examples' },
-      { text: 'Commands', link: '/commands' },
     ],
     sidebar: [
       {
-        text: 'Start',
+        text: 'Learn Flow',
         items: [
-          { text: 'Why Flow', link: '/flow-language' },
-          { text: 'Quick start', link: '/quick-start' },
-          { text: 'Examples', link: '/examples' },
+          { text: 'Introduction', link: '/flow-language' },
+          { text: 'Your first program', link: '/quick-start' },
+          { text: 'Syntax and values', link: '/syntax' },
+          { text: 'Prompt conversion', link: '/prompt-to-flow' },
         ],
       },
       {
-        text: 'Language',
+        text: 'Guides',
         items: [
-          { text: 'Syntax', link: '/syntax' },
-          { text: 'Commands', link: '/commands' },
-          { text: 'Reusing flows', link: '/reuse' },
-          { text: 'Execution', link: '/execution' },
+          { text: 'Reusing programs', link: '/reuse' },
+          { text: 'Execution and failures', link: '/execution' },
+          { text: 'Editor setup', link: '/editor-setup' },
+          { text: 'Real-world examples', link: '/examples' },
+        ],
+      },
+      {
+        text: 'Reference',
+        items: [
+          { text: 'Command reference', link: '/commands' },
+          { text: 'Language specification', link: '/specification' },
+          { text: 'Agent interpreter contract', link: '/interpreter' },
         ],
       },
     ],

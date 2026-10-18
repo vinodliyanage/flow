@@ -5,6 +5,10 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'examples/**'
+      - 'skills/flow/references/interpreter.md'
+      - 'extensions/flow/package.json'
+      - 'extensions/flow/images/**'
       - 'extensions/flow/syntaxes/flow.tmLanguage.json'
       - 'package.json'
       - 'package-lock.json'

@@ -1,113 +1,460 @@
-# Commands
+---
+description: Look up every Flow command with syntax, behavior, results, restrictions, and readable examples.
+---
 
-[Flow](flow-language.md) · [Quick start](quick-start.md) · [Syntax](syntax.md)
+# Command reference
 
-Commands are the verbs in a flow. Most workflows need only five of them: ask for
-missing input, store data, do work, show a result, and choose a path.
+Every built-in command is listed here. Each entry gives its form, behavior,
+result, restrictions, and an example. The [language specification](specification.md)
+defines the shared syntax, values, scopes, and execution rules.
 
-In the syntax below, square brackets mark optional parts; do not type the
-brackets. `CHECK`, `STOP`, and `SHELL` are not built-ins. `AWAIT` replaces the
-older `WAIT` command.
+In signatures, angle brackets name placeholders and square brackets mark
+optional parts. Do not type those brackets. `body` means indented instructions;
+`literal body` means text that Flow does not execute.
 
-## The five commands to start with
-
-| Command | Meaning |
+| Command | Purpose |
 | --- | --- |
-| `ASK "question" AS name` | Ask and wait for a fresh reply. Store raw text, including an empty reply. |
-| `SET name = expression` | Evaluate and store a value without external actions. |
-| `DO task [AS name]` | Perform only the stated task, using tools as needed. Optionally store its result. |
-| `PRINT expression` | Display strings as text and other values as JSON in chat, then continue. |
-| `PRINT report request` | Compose and display a report from existing information, without new external actions. |
+| [ASK](#ask) | Ask for a fresh user answer and wait. |
+| [SET](#set) | Create or replace a binding. |
+| [CONTEXT](#context) | Store literal background text. |
+| [DO](#do) | Complete an agent task. |
+| [PRINT](#print) | Display a value or compose a report. |
+| [IF / ELSE](#if-and-else) | Select a branch. |
+| [REPEAT](#repeat) | Repeat a body a fixed number of times. |
+| [WHILE](#while) | Repeat while a condition is true. |
+| [CONTINUE](#continue) | Advance to the next loop iteration. |
+| [BREAK](#break) | Leave a loop. |
+| [USE](#use) | Read Markdown, run a child, or register a command. |
+| [RUN](#run) | Launch a direct process. |
+| [ASYNC](#async) | Start an independent background task. |
+| [AWAIT](#await) | Join a task and expose its bindings. |
+| [RETURN](#return) | Exit the current invocation. |
+| [Custom command call](#custom-command-call) | Invoke a registered command with one value. |
 
-`ASK` is a real pause. It never infers or reuses an answer, and no later
-instruction on that path runs until the user replies.
+## ASK
 
-`DO` is where agent work happens. Its wording defines the boundary: no unrelated
-setup, repair, retry, or publication is added automatically. When later steps
-need particular result fields, name those fields and their types in the task.
+```text
+ASK <string> AS <name>
+```
+
+Display the question and wait for a fresh user reply. Store the raw answer as
+a string in `name`, including an empty answer. A later instruction on the same
+path cannot start while the question is unanswered. Reaching `ASK` again asks
+again; previous answers are not reused.
+
+```flow
+ASK "What is your name?" AS name
+PRINT @name
+```
+
+**Result:** the answer string. `AS name` is required. `ASK` is prohibited inside
+an `ASYNC` body. It does not convert a numeric-looking answer into a number.
+
+## SET
+
+```text
+SET <name> = <expression>
+```
+
+Evaluate the expression, then create or replace `name`. Evaluation cannot
+perform an external action. If evaluation fails, leave the old binding intact.
+
+```flow
+SET count = 2
+SET count = @count + 1
+PRINT @count
+```
+
+**Binding:** `count` holds `3`. `SET` uses the name before `=`, rather than an
+`AS` suffix. Unknown references and invalid operand types are errors. The
+current contract does not explicitly define a separate `SET` instruction result
+for use as a custom command's final result; use a final `DO` for that purpose.
 
 ## CONTEXT
 
-`CONTEXT` gives a task background without turning that background into new
-instructions. Store it once, then reference it explicitly:
+```text
+CONTEXT
+    <literal body>
+AS <name>
+```
+
+Store the body as background text. Remove one structural indentation level and
+preserve the remaining whitespace and line breaks. The aligned `AS name` is
+required. References, comments, and commands inside the body remain literal.
 
 ```flow
 CONTEXT
-    Keep the greeting short and friendly.
+    Write one short sentence.
+    Use only the information supplied in the task.
 AS guidelines
-DO Write a greeting for @name following @guidelines. AS greeting
+
+DO Describe the Flow language following @guidelines. AS description
+PRINT @description
 ```
 
-An aligned `AS name` closes the block and is required. The body follows the
-[literal-text rules](syntax.md#long-prose-and-literal-bodies).
+**Result:** the body string. Storing context does not execute it; a later task
+references it explicitly.
+
+## DO
+
+```text
+DO <task> [AS <name>]
+```
+
+Complete the stated task, using tools when the task requires them. Resolve
+references as data. An immediately following prose continuation is indented one
+level; join continuation lines with spaces. Put the optional `AS name` at the
+end of the complete task.
+
+```flow
+DO Describe how ASK pauses execution.
+    Return an object with a summary string and an examples array. AS description
+PRINT @description.summary
+```
+
+**Result:** the task's completed output; optionally stored with `AS`. State the
+required result shape when later instructions use fields. The output is produced
+by the agent, so the language does not give it a fixed schema automatically.
+
+The task authorizes only its stated work. Unrelated setup, repair, retries,
+cleanup, publication, and additional artifacts are not added automatically.
+Failure or uncertain completion stops ordinary execution.
+
+## PRINT
+
+```text
+PRINT <expression>
+PRINT <part> <part> ...
+PRINT <report request>
+```
+
+Use exact output when you already know the text and values to display. Use a
+prose instruction when the agent should compose the response from available
+information.
+
+```flow
+SET name = "Ana"
+PRINT "Hello:" @name
+PRINT Say hello to @name.
+```
+
+The first `PRINT` displays exactly `Hello: Ana`. The second asks the agent to
+generate a greeting, so its wording can vary.
+
+An exact `PRINT` accepts one complete expression, or two or more literals and
+standalone references separated by whitespace. Render strings unchanged and
+other values as JSON. Join multiple rendered parts with one space and display
+one message. Preserve whitespace inside strings; `"@name"` stays literal.
+
+```flow
+SET count = 2
+PRINT @count + 1
+PRINT "Count:" @count
+PRINT "Literal:" "@count"
+```
+
+These display `3`, `Count: 2`, and `Literal: @count`. Operators belong to a
+single expression, not to the parts list. Bind a calculation first when it
+needs to be combined with a label.
+
+Input beginning with a string delimiter, `@`, `(`, `[`, `{`, a number, or the
+standalone keywords `TRUE`, `FALSE`, `NULL`, or `NOT` selects exact output.
+Try one complete expression, then a complete list of literals/references.
+Malformed exact input is an error, not prose. Other nonempty input selects
+the prose form; only that form accepts indented prose continuations.
+
+**Result:** one displayed message; no binding. Resolve all values before any
+output. A missing reference or invalid expression fails without partial output.
+A bare `PRINT` is an error. `PRINT` cannot perform new research or other external
+work, and it does not exit the program.
 
 ## IF and ELSE
 
-Use a branch when the next step depends on information already available:
+```text
+IF <condition>
+    <body>
+[ELSE
+    <body>]
+```
+
+Evaluate the condition once. Execute the `IF` body when true; otherwise execute
+the optional `ELSE` body. `ELSE` aligns with its `IF` and immediately follows
+the body, allowing intervening blank lines or comments. Nest another `IF`
+inside `ELSE` for another alternative.
 
 ```flow
-ASK "Proceed? Enter yes or no." AS answer
-IF @answer == "yes"
-    DO Perform the task.
+ASK "Proceed? Type yes or no." AS answer
+IF @answer is exactly "yes"
+    PRINT "Proceeding."
 ELSE
     RETURN "Cancelled."
 ```
 
-IF evaluates once and runs only the selected body. ELSE is optional; it aligns
-with IF and follows its body, ignoring comments and blank lines. For more
-alternatives, nest another IF inside ELSE.
+**Result:** no branch result is specified; body instructions may update shared
+bindings. Prefer plain-English conditions when they describe the decision clearly.
+For a precise text check, say `is exactly "yes"` or `is not exactly "yes"`.
+An empty string has zero characters; whitespace alone is not empty. Exact
+Boolean expressions are also supported. Missing evidence is an error, not a
+false condition.
 
-A condition can be an exact Boolean expression or a natural-language condition:
+## REPEAT
 
-```flow
-IF @name is an empty string
-    RETURN "A name is required."
+```text
+REPEAT <count> TIMES
+    <body>
 ```
 
-Judge prose conditions from available evidence. An empty string has zero
-characters; whitespace alone is not empty. A malformed expression is an error,
-not prose. Stop when a condition cannot be determined; never guess.
-
-## Loops
-
-Use `REPEAT` when the number of iterations is known at entry:
+Capture a nonnegative integer count once on entry. Run the body sequentially
+that many times, sharing bindings with the surrounding scope. Zero skips it.
+Use an integer literal or a binding containing an integer.
 
 ```flow
-REPEAT 3 TIMES
-    PRINT "Hello"
+SET repetitions = 3
+REPEAT @repetitions TIMES
+    PRINT "Hello."
 ```
 
-REPEAT captures a nonnegative integer literal or binding reference once on entry.
-Iterations run sequentially with shared bindings. Zero skips the body.
+**Result:** no loop result is specified. A negative or noninteger count is an
+error. Updating `repetitions` in the body does not change the captured count.
+Reached body instructions count toward the run's shared instruction limit.
+
+## WHILE
+
+```text
+WHILE <condition>
+    <body>
+```
+
+Evaluate the condition before each iteration. Run the body while true, with
+shared bindings. A false first condition skips the body.
 
 ```flow
 SET count = 0
-WHILE @count < 3
+WHILE @count is less than 3
     PRINT @count
     SET count = @count + 1
 ```
 
-Use `WHILE` when the decision must be checked again before each iteration.
+**Result:** no loop result is specified. Conditions have the same rules as
+`IF`. An undeterminable condition or exhausted instruction limit stops the run.
 
-WHILE uses the same condition rules as IF and tests before every iteration.
+## CONTINUE
 
-| Command | Meaning |
+```text
+CONTINUE
+```
+
+Skip the rest of the nearest current loop iteration. `WHILE` evaluates its
+condition again; `REPEAT` proceeds to its next iteration.
+
+```flow
+SET count = 0
+WHILE @count is less than 3
+    SET count = @count + 1
+    IF @count is exactly 2
+        CONTINUE
+    PRINT @count
+```
+
+This displays `1` and `3`. **Result:** none. The command is an error outside a
+loop in the current invocation or task; it cannot control a caller's loop.
+
+## BREAK
+
+```text
+BREAK
+```
+
+Exit the nearest current loop and continue after it.
+
+```flow
+REPEAT 3 TIMES
+    PRINT "Once."
+    BREAK
+PRINT "After the loop."
+```
+
+**Result:** none. The command is an error outside a loop in the current
+invocation or task; it cannot control a caller's loop.
+
+## USE
+
+```text
+USE <path.md> AS <name>
+USE <path.md#section> AS <name>
+USE <path.flow>
+```
+
+The target determines the operation:
+
+| Target | Behavior | Data visible afterward |
+| --- | --- | --- |
+| Markdown file or heading section | Read text as data. | Text stored in the required `AS` binding. |
+| Ordinary `.flow` file | Read, validate, and run the child synchronously. | Caller and child share bindings. |
+| `.flow` command definition | Read, validate, and register the command without executing its body. | The command can be called. |
+
+Paths are literal and resolve from the containing program's directory. `USE`
+does not change the process working directory. Read a child only when the
+instruction is reached. Missing files, ambiguous Markdown sections, and recursive
+imports are errors. `USE` is prohibited in an `ASYNC` body.
+
+For example, given a `guidelines.md` file beside the program:
+
+```flow
+USE guidelines.md AS guidelines
+DO Write a short greeting following @guidelines. AS greeting
+PRINT @greeting
+```
+
+See [reusing programs](reuse.md) for complete child and custom-command examples
+and the Markdown section-selection rules.
+
+## RUN
+
+```text
+RUN <executable> [<arguments>]
+    <literal stdin body>
+[AS <name>]
+```
+
+Launch a direct process. The body becomes standard input; the optional `AS`
+line aligns with `RUN`. Keep the instruction active until the process exits.
+
+```flow
+SET name = "Ana Maria"
+RUN python3 - @name
+    import sys
+    print(f"Hello, {sys.argv[1]}!")
+AS result
+PRINT @result.stdout
+```
+
+This example requires `python3` on the host. **Result:** an object with string
+`stdout`, string `stderr`, and integer `exit_code` for a completed process.
+
+| Argument | Process argument |
 | --- | --- |
-| `CONTINUE` | Skip the rest of the nearest loop's current iteration. WHILE retests; REPEAT advances its count. |
-| `BREAK` | Exit the nearest loop and continue after it. |
+| Quoted string or simple literal token | One unchanged argument. |
+| Number | Its JSON number text. |
+| Boolean | `true` or `false`. |
+| Standalone reference | Its value, subject to these same type rules. |
 
-Both are valid only inside a loop in the current flow or task.
+`NULL`, arrays, objects, and references embedded in other tokens are invalid
+arguments. There is no shell expansion, interpolation, piping, redirection,
+command substitution, or automatic environment containing Flow bindings.
+Invoke a shell explicitly when needed:
+
+```flow
+RUN sh
+    git status --short
+AS status
+```
+
+That example requires `sh`, Git, and a Git working directory. Processes use the
+host working directory and a default 30-second timeout. A nonzero exit, timeout,
+or missing executable fails the run. Available output is retained for reporting;
+whether a failed process updates its `AS` binding is currently
+[unresolved](specification.md#unresolved-rules).
+
+## ASYNC
+
+```text
+ASYNC <task_name>
+    <body>
+```
+
+Start the body as an independent background task and immediately advance the
+main path. The task runs its instructions sequentially, using an isolated
+snapshot of bindings taken at launch.
+
+```flow
+ASYNC first
+    DO Write a short greeting in English. AS greeting
+ASYNC second
+    DO Write a short greeting in Spanish. AS greeting
+AWAIT first
+AWAIT second
+PRINT @first.greeting
+PRINT @second.greeting
+```
+
+**Result:** a named task that can be joined with `AWAIT`. Task names are unique
+and cannot collide with bindings. `ASYNC` is top-level only. Its body cannot
+contain `ASK`, `USE`, `ASYNC`, or `AWAIT`.
+
+Tasks must not depend on unfinished sibling results or concurrently change
+the same resource. If the host cannot run real background work, stop before
+launch. Sequential work must not be presented as concurrent execution.
+
+## AWAIT
+
+```text
+AWAIT <task_name>
+```
+
+Wait for a known task to finish successfully, then expose its bindings as
+`@task_name.field`. Repeating `AWAIT` does not rerun the task.
+
+```flow
+ASYNC calculation
+    SET total = 20 + 5
+AWAIT calculation
+PRINT @calculation.total
+```
+
+**Result:** the task's bindings become accessible; `AWAIT` takes no `AS` suffix.
+An unknown task is an error. A known task failure stops ordinary scheduling.
+`AWAIT` is prohibited inside an `ASYNC` body.
 
 ## RETURN
 
+```text
+RETURN [<message>]
+```
+
+Exit the current invocation normally, optionally displaying a message. Reaching
+file end has the same effect as a message-free `RETURN`.
+
 ```flow
+PRINT "Before return."
 RETURN "Finished."
 ```
 
-RETURN exits the current invocation normally. Its optional message is displayed;
-it is not returned data. A child flow resumes its caller, the root flow finishes,
-and a task or custom command exits locally. File end acts like message-free RETURN.
-Outstanding tasks settle before exit.
+**Result:** no returned data. In the root program, `RETURN` ends the run; in an
+ordinary child, it resumes the caller; in a task or custom command, it exits
+only that scope. Outstanding tasks settle before a scope exits.
 
-When a workflow grows, continue with [USE and custom commands](reuse.md). For
-real processes and parallel work, see [execution](execution.md).
+Use a quoted message, or omit it. The contract does not fully specify the
+allowed message expression forms. A message displayed by `RETURN` is not a
+custom command's return value.
+
+## Custom command call
+
+```text
+<COMMAND_NAME> <value> [AS <name>]
+```
+
+Register a definition with `USE`, then pass one value to it as local `@input`.
+The invocation has isolated bindings. With `AS name`, its final executed
+instruction must produce a result to store in the caller. Without `AS`, discard
+the result.
+
+In `trim.flow`:
+
+```flow
+DO Remove surrounding whitespace from @input and return the resulting string.
+AS COMMAND TRIM
+```
+
+In the caller beside `trim.flow`:
+
+```flow
+USE trim.flow
+TRIM "  Ana  " AS name
+PRINT @name
+```
+
+**Result:** the final instruction's result, optionally stored in the caller.
+Unknown names, duplicate definitions, built-in name collisions, and recursive
+calls are errors. See [custom-command scope](reuse.md#custom-commands) before
+building larger definitions.
