@@ -87,7 +87,7 @@ test('references, bindings, custom commands, JSON strings and Boolean operators 
   assert.ok(!hasScope(tokenize(flow, 'SET x = trim("x")')[0], 'support.function.flow'));
 });
 
-test('labels, references, commands, and strings have explicit default colors', () => {
+test('labels, references, commands, and quoted strings have explicit default colors', () => {
   const rules = read('package.json').contributes.configurationDefaults
     ['editor.tokenColorCustomizations'].textMateRules;
   const colorFor = scope => rules.find(rule => rule.scope === scope ||
@@ -97,7 +97,7 @@ test('labels, references, commands, and strings have explicit default colors', (
   assert.equal(colorFor('entity.name.function.flow'), '#DCDCAA');
   assert.equal(colorFor('string.quoted.double.flow'), '#98C379');
   assert.equal(colorFor('string.quoted.triple.flow'), '#98C379');
-  assert.equal(colorFor('string.unquoted.block.flow'), '#98C379');
+  assert.equal(colorFor('meta.literal.block.flow'), undefined);
 });
 
 test('CONTEXT and RUN bodies stay literal, then normal highlighting resumes', () => {
@@ -108,7 +108,7 @@ test('CONTEXT and RUN bodies stay literal, then normal highlighting resumes', ()
   ].join('\n');
   const tokens = tokenize(flow, source);
   for (const line of [1, 2, 3, 6, 7, 8, 9]) {
-    assert.ok(hasScope(tokens[line], 'string.unquoted.block.flow'), `literal line ${line}`);
+    assert.ok(hasScope(tokens[line], 'meta.literal.block.flow'), `literal line ${line}`);
     assert.ok(!tokens[line].some(token => token.scopes.some(scope => /^(keyword|variable|markup\.underline)/.test(scope))));
   }
   assert.ok(hasScope(tokens[4], 'variable.other.flow'));
@@ -155,7 +155,7 @@ test('Markdown Flow fences highlight and link; prose, inline code and other fenc
   ].join('\n');
   const tokens = tokenize(markdown, source);
   assert.ok(hasScope(tokens[9], 'keyword.control.flow.await'));
-  assert.ok(hasScope(tokens[7], 'string.unquoted.block.flow'));
+  assert.ok(hasScope(tokens[7], 'meta.literal.block.flow'));
   assert.ok(hasScope(tokens[10], 'markup.underline.link.flow'));
   assert.ok(!hasScope(tokens[12], 'keyword.control.flow.await'));
   assert.ok(!hasScope(tokens[3], 'markup.underline.link.flow'));
@@ -184,9 +184,9 @@ test('nested literal bodies use the header indentation and resume in the parent 
     '    USE visible.flow', 'AWAIT task'
   ].join('\n');
   const tokens = tokenize(flow, source);
-  assert.ok(hasScope(tokens[3], 'string.unquoted.block.flow'));
+  assert.ok(hasScope(tokens[3], 'meta.literal.block.flow'));
   assert.ok(hasScope(tokens[4], 'variable.other.flow'));
-  assert.ok(hasScope(tokens[6], 'string.unquoted.block.flow'));
+  assert.ok(hasScope(tokens[6], 'meta.literal.block.flow'));
   assert.ok(hasScope(tokens[8], 'variable.other.flow'));
   assert.ok(hasScope(tokens[9], 'markup.underline.link.flow'));
   assert.deepEqual(findUseReferences(source).map(reference => reference.filename), ['visible.flow']);
@@ -195,7 +195,7 @@ test('nested literal bodies use the header indentation and resume in the parent 
 test('literal code fences inside RUN do not close the enclosing Markdown flow fence', () => {
   const source = ['```flow', 'RUN sh', '    ```', '    USE hidden.flow', 'AS result', 'USE real.flow', '```', '# Heading'].join('\n');
   const tokens = tokenize(markdown, source);
-  assert.ok(hasScope(tokens[3], 'string.unquoted.block.flow'));
+  assert.ok(hasScope(tokens[3], 'meta.literal.block.flow'));
   assert.ok(hasScope(tokens[5], 'markup.underline.link.flow'));
   assert.ok(!hasScope(tokens[7], 'comment.line.number-sign.flow'));
   assert.deepEqual(findUseReferences(source, true).map(reference => reference.filename), ['real.flow']);

@@ -13,16 +13,17 @@ Bindings use `AS name`; references use `@name.field`; custom commands use
 Raw triple-quoted strings (`"""..."""`) preserve multiline text without interpolation,
 escapes, comment parsing, or file links.
 Declared labels, `@references`, and custom command names have distinct default
-colors. Strings use the same `#98C379` green as the documentation. All defaults
+colors. Only quoted strings use the same `#98C379` green as the documentation;
+literal CONTEXT and RUN bodies keep the editor's normal text color. All defaults
 remain overridable by the active theme.
 
 ## Install
 
 Run **Extensions: Install from VSIX...** and choose
-`dist/flow-0.2.6.vsix`, or:
+`dist/flow-0.2.7.vsix`, or:
 
 ```sh
-cursor --install-extension /absolute/path/extensions/flow/dist/flow-0.2.6.vsix
+cursor --install-extension /absolute/path/extensions/flow/dist/flow-0.2.7.vsix
 ```
 
 Reload the window if open files have not refreshed. `.flow` uses **Flow** language
