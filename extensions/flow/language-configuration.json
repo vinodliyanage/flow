@@ -38,6 +38,14 @@
       "close": "}"
     }
   ],
+  "onEnterRules": [
+    {
+      "beforeText": "^ *(?!.*: *$)(?:(?:IF|WHILE|REPEAT|ASYNC|RUN)\\b.*|ELSE|CONTEXT) *$",
+      "action": {
+        "indent": "indent"
+      }
+    }
+  ],
   "indentationRules": {
     "increaseIndentPattern": "^ *(?!.*: *$)(?:(?:IF|WHILE|REPEAT|ASYNC|RUN)\\b.*|ELSE|CONTEXT) *$",
     "decreaseIndentPattern": "^ *(?:ELSE|AS +[a-z][a-z0-9_]*) *$"

@@ -1,0 +1,52 @@
+{
+  "ASK for input": {
+    "prefix": "ASK",
+    "body": "ASK \"${1:Question?}\" AS ${2:answer}$0",
+    "description": "Ask a question, wait for a fresh reply, and store the answer."
+  },
+  "DO a task": {
+    "prefix": "DO",
+    "body": "DO ${1:Describe the task.} AS ${2:result}$0",
+    "description": "Complete an agent task and store its result."
+  },
+  "PRINT a value": {
+    "prefix": "PRINT",
+    "body": "PRINT ${1:@result}$0",
+    "description": "Display an existing value or exact expression."
+  },
+  "PRINT an instruction": {
+    "prefix": "PRINT",
+    "body": "PRINT ${1:Summarize @result.}$0",
+    "description": "Compose a response from information already available."
+  },
+  "IF a condition": {
+    "prefix": "IF",
+    "body": [
+      "IF ${1:@answer is exactly \"yes\"}",
+      "    ${2:PRINT \"Approved.\"}",
+      "$0"
+    ],
+    "description": "Run an indented body when the condition is true."
+  },
+  "IF / ELSE branches": {
+    "prefix": "IF",
+    "body": [
+      "IF ${1:@answer is exactly \"yes\"}",
+      "    ${2:PRINT \"Approved.\"}",
+      "ELSE",
+      "    ${3:RETURN \"Not approved.\"}",
+      "$0"
+    ],
+    "description": "Choose between two branches with aligned IF and ELSE."
+  },
+  "CONTEXT background text": {
+    "prefix": "CONTEXT",
+    "body": [
+      "CONTEXT",
+      "    ${1:Background guidance.}",
+      "AS ${2:guidelines}",
+      "$0"
+    ],
+    "description": "Store literal background text in an aligned AS binding."
+  }
+}

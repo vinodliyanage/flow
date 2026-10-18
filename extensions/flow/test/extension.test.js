@@ -199,6 +199,75 @@ test('colon-free block headers indent, ELSE/AS dedent, REPEAT remains pink', () 
 });
 
 
+test('four-space editing defaults apply only to Flow', () => {
+  const defaults = read('package.json').contributes.configurationDefaults;
+  assert.deepEqual(defaults['[flow]'], {
+    'editor.tabSize': 4,
+    'editor.insertSpaces': true,
+    'editor.detectIndentation': false
+  });
+  assert.equal(defaults['[markdown]'], undefined);
+  for (const key of ['editor.tabSize', 'editor.insertSpaces', 'editor.detectIndentation']) {
+    assert.equal(defaults[key], undefined);
+  }
+});
+
+test('Enter explicitly indents block headers at any nesting level', () => {
+  const config = read('language-configuration.json');
+  assert.deepEqual(config.onEnterRules, [{
+    beforeText: config.indentationRules.increaseIndentPattern,
+    action: { indent: 'indent' }
+  }]);
+  const header = new RegExp(config.onEnterRules[0].beforeText);
+  for (const indent of ['', '    ', '        ']) {
+    for (const command of ['IF TRUE', 'ELSE', 'REPEAT 3 TIMES', 'WHILE FALSE', 'ASYNC task', 'CONTEXT', 'RUN sh']) {
+      assert.ok(header.test(indent + command), indent + command);
+    }
+  }
+  for (const line of ['ASK "Name?" AS name', 'DO Review @name. AS result',
+    'PRINT "IF TRUE"', 'AS result', '# IF TRUE', 'IF TRUE:']) {
+    assert.ok(!header.test(line), line);
+  }
+});
+
+test('seven editable command snippets are registered only for Flow', () => {
+  const contributions = read('package.json').contributes.snippets;
+  assert.deepEqual(contributions, [{ language: 'flow', path: './snippets/flow.json' }]);
+  const snippets = read(contributions[0].path);
+  assert.equal(Object.keys(snippets).length, 7);
+  for (const [name, snippet] of Object.entries(snippets)) {
+    const body = Array.isArray(snippet.body) ? snippet.body.join('\n') : snippet.body;
+    assert.ok(snippet.description, name);
+    assert.ok(body.startsWith(snippet.prefix + ' ') || body.startsWith(snippet.prefix + '\n'), name);
+    assert.ok(body.endsWith('$0'), name);
+    const stops = [...body.matchAll(/\$\{(\d+):[^}]+\}/g)].map(match => Number(match[1]));
+    assert.deepEqual(stops, stops.map((_, index) => index + 1), name);
+    const expanded = body.replace(/\$\{\d+:([^}]+)\}|\$0/g, (_, value) => value || '');
+    assert.ok(hasScope(tokenize(flow, expanded)[0],
+      'keyword.control.flow.' + snippet.prefix.toLowerCase()), name);
+    assert.ok(!expanded.includes('\t'), name);
+    for (const line of expanded.split('\n')) {
+      assert.equal(line.match(/^ */)[0].length % 4, 0, name);
+    }
+  }
+});
+
+test('branch and literal snippets preserve Flow structure', () => {
+  const snippets = read('snippets/flow.json');
+  assert.deepEqual(snippets['IF / ELSE branches'].body, [
+    'IF ${1:@answer is exactly "yes"}',
+    '    ${2:PRINT "Approved."}',
+    'ELSE',
+    '    ${3:RETURN "Not approved."}',
+    '$0'
+  ]);
+  assert.deepEqual(snippets['CONTEXT background text'].body, [
+    'CONTEXT', '    ${1:Background guidance.}', 'AS ${2:guidelines}', '$0'
+  ]);
+  assert.equal(snippets['PRINT a value'].body, 'PRINT ${1:@result}$0');
+  assert.equal(snippets['PRINT an instruction'].body, 'PRINT ${1:Summarize @result.}$0');
+});
+
 test('nested literal bodies use the header indentation and resume in the parent block', () => {
   const source = [
     'IF TRUE', '    CONTEXT', '        AS fake', '        USE hidden.flow', '    AS context',

@@ -1,8 +1,8 @@
 {
   "name": "flow",
   "displayName": "Flow",
-  "description": "Highlight the Flow language specification and navigate USE references in .flow and Markdown files.",
-  "version": "0.2.7",
+  "description": "Flow syntax highlighting, four-space editing, command snippets, and USE navigation.",
+  "version": "0.2.8",
   "publisher": "vinodliyanage",
   "author": "Vinod Liyanage",
   "icon": "images/icon.png",
@@ -60,7 +60,18 @@
         }
       }
     ],
+    "snippets": [
+      {
+        "language": "flow",
+        "path": "./snippets/flow.json"
+      }
+    ],
     "configurationDefaults": {
+      "[flow]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.detectIndentation": false
+      },
       "editor.tokenColorCustomizations": {
         "textMateRules": [
           {
