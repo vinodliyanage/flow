@@ -63,7 +63,7 @@ export default defineConfig({
   lang: 'en-US',
   title: 'Flow',
   description: 'A small language for giving agents a visible path through a task.',
-  base: '/flow/',
+  base: '/',
   lastUpdated: true,
   vite: {
     publicDir: fileURLToPath(
@@ -71,7 +71,7 @@ export default defineConfig({
     ),
   },
   head: [
-    ['link', { rel: 'icon', type: 'image/png', href: '/flow/icon.png' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/icon.png' }],
     ['meta', { name: 'theme-color', content: '#3157d5' }],
   ],
   markdown: {
