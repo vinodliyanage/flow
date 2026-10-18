@@ -1,8 +1,8 @@
 # Flow
 
-Syntax highlighting, indentation, and USE file navigation for Flow in Cursor
-and VS Code. The language specification is `docs/specification.md` at the
-repository root.
+Syntax highlighting, indentation, command snippets, and USE file navigation
+for Flow in Cursor and VS Code. The language specification is
+`docs/specification.md` at the repository root.
 Supports `.flow` files and Markdown `flow` fences. It does not execute, validate,
 or format programs.
 
@@ -20,16 +20,32 @@ remain overridable by the active theme.
 ## Install
 
 Run **Extensions: Install from VSIX...** and choose
-`skills/flow/assets/flow-0.2.7.vsix` from the repository root, or:
+`skills/flow/assets/flow-0.2.8.vsix` from the repository root, or:
 
 ```sh
-cursor --install-extension /absolute/path/to/flow/skills/flow/assets/flow-0.2.7.vsix
+cursor --install-extension /absolute/path/to/flow/skills/flow/assets/flow-0.2.8.vsix
 ```
 
 Reload the window if open files have not refreshed. `.flow` uses **Flow** language
 mode; Markdown keeps Markdown mode. Command-click (macOS) or Ctrl-click opens USE
 references relative to the containing file, including Markdown guidance files.
 Colors follow the extension defaults and any user theme overrides.
+
+## Writing a Flow file
+
+In **Flow** language mode, indentation defaults to four spaces. Block
+rules indent after headers such as `IF`, `ELSE`, and `REPEAT`. Explicit user or
+workspace settings can override these defaults; no settings files are changed.
+
+Type `ASK`, `DO`, `PRINT`, `IF`, or `CONTEXT` and use **Trigger Suggest**, or open
+**Insert Snippet** in the Command Palette. Select a template, then press Tab to
+move through its editable fields. `PRINT` offers value and prose forms; `IF`
+offers one branch or `IF`/`ELSE`. Templates are starting points, not automatically
+executed programs.
+
+Snippets and four-space defaults apply to `.flow` files, not Markdown. Markdown
+Flow fences retain their existing highlighting and USE navigation. There is no
+formatter, validation, or binding-aware autocomplete in this version.
 
 ## Develop
 
