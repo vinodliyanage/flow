@@ -23,6 +23,13 @@ import { withBase } from 'vitepress'
         </div>
       </article>
 
+      <div class="comparison-arrow" aria-hidden="true">
+        <svg viewBox="0 0 80 60" fill="none">
+          <path class="arrow-desktop" d="M15 56C18 13 57 13 65 56M53 43Q60 49 65 56Q66 47 70 39" />
+          <path class="arrow-stacked" d="M9 43C17 28 36 20 68 25M52 14C58 18 63 21 69 25C62 28 58 33 54 39" />
+        </svg>
+      </div>
+
       <article class="comparison-panel code-panel" aria-labelledby="flow-title">
         <header class="panel-header">
           <h2 id="flow-title">Equivalent Flow</h2>
@@ -72,10 +79,40 @@ import { withBase } from 'vitepress'
 }
 
 .hero-comparison {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 20px;
   align-items: stretch;
+  margin-top: 64px;
+}
+
+.comparison-arrow {
+  position: absolute;
+  top: -88px;
+  left: 50%;
+  display: grid;
+  width: 112px;
+  height: 84px;
+  align-self: center;
+  justify-self: center;
+  place-items: center;
+  color: #9873df;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.comparison-arrow svg {
+  width: 112px;
+  height: 84px;
+  stroke: currentColor;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.arrow-stacked {
+  display: none;
 }
 
 .comparison-panel {
@@ -155,14 +192,16 @@ import { withBase } from 'vitepress'
 
 .code-content :deep(pre) {
   padding: 22px;
+  overflow-x: auto;
 }
 
 .code-content :deep(code) {
   padding: 0;
   font-size: 13px;
   line-height: 1.85;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .hero-actions {
@@ -206,9 +245,31 @@ import { withBase } from 'vitepress'
   outline-offset: 4px;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1100px) {
   .hero-comparison {
     grid-template-columns: minmax(0, 1fr);
+    margin-top: 0;
+  }
+
+  .comparison-arrow {
+    position: static;
+    width: 64px;
+    height: 52px;
+    transform: rotate(90deg);
+  }
+
+  .comparison-arrow svg {
+    width: 64px;
+    height: 52px;
+    stroke-width: 3.25;
+  }
+
+  .arrow-desktop {
+    display: none;
+  }
+
+  .arrow-stacked {
+    display: inline;
   }
 }
 

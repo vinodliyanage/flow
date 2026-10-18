@@ -47,7 +47,8 @@ IF @approval is not exactly "yes"
     RETURN "Release notes were not approved."
 
 DO Create a release handoff using @release, @review, and @notes.
-    Include a summary, notes, review findings, and next steps. AS handoff
+    Include a summary, notes, review findings,
+    and next steps. AS handoff
 PRINT @handoff
 ```
 
