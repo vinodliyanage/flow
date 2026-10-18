@@ -28,7 +28,7 @@
           "name": "variable.other.flow"
         }
       },
-      "contentName": "string.unquoted.block.flow"
+      "contentName": "meta.literal.block.flow"
     },
     {
       "begin": "^( *)(RUN)\\b(.*)$",
@@ -45,7 +45,7 @@
           ]
         }
       },
-      "contentName": "string.unquoted.block.flow"
+      "contentName": "meta.literal.block.flow"
     },
     {
       "begin": "^( *)(DO)\\b(?!.*\"\"\")(.*)$",
