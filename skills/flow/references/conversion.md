@@ -53,12 +53,15 @@ semantics. Read it first and never emit commands or forms it does not define.
 - Put judgment or tool-using work in `DO`. If later instructions read its
   result, state the required result shape and fields in the task and store it
   with `AS name`.
-- Use exact expressions for known values, numeric comparisons, and strict
-  gates. Use a natural-language condition only when the decision genuinely
-  requires semantic judgment. Make the evidence it may use explicit.
-- Use `PRINT` for output already available in bindings. Prose `PRINT` may format
-  a report from existing information but must not perform new research or other
-  external work.
+- Prefer plain-English conditions when they express the decision clearly,
+  including precise checks such as `IF @approval is exactly "yes"`. Preserve
+  exact accepted values and required evidence. Use symbolic expressions when
+  they communicate a calculation or condition more clearly.
+- Use exact `PRINT` for fixed output, such as `PRINT "Hello:" @name`; literals
+  and standalone references render in order with one space between parts.
+  Use prose `PRINT`, such as `PRINT Say hello to @name.`, when the agent should
+  compose the wording from available information. Neither form performs new
+  research or other external work.
 - Use `RUN` only when the prompt requires a real executable process. Preserve
   argument order and pass values as standalone arguments. Invoke a shell
   explicitly when shell syntax is required. Do not translate ordinary agent
@@ -111,9 +114,9 @@ Conversion:
 ```flow
 ASK "Which environment will be deployed?" AS environment
 
-IF @environment == "production"
+IF @environment is exactly "production"
     ASK "Approve the production deployment? Type exactly: yes or no" AS approval
-    IF @approval == "yes"
+    IF @approval is exactly "yes"
         PRINT "Production deployment approved."
     ELSE
         RETURN "Production deployment was not approved."
