@@ -1,0 +1,380 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Flow",
+  "scopeName": "source.flow",
+  "patterns": [
+    {
+      "name": "comment.block.flow",
+      "begin": "^ *### *$",
+      "end": "^ *### *$"
+    },
+    {
+      "name": "comment.line.number-sign.flow",
+      "match": "^ *#.*$"
+    },
+    {
+      "begin": "^( *)(CONTEXT) *$",
+      "end": "^\\1(AS) +([a-z][a-z0-9_]*) *$",
+      "beginCaptures": {
+        "2": {
+          "name": "keyword.control.flow.context"
+        }
+      },
+      "endCaptures": {
+        "1": {
+          "name": "keyword.other.flow"
+        },
+        "2": {
+          "name": "variable.other.flow"
+        }
+      },
+      "contentName": "string.unquoted.block.flow"
+    },
+    {
+      "begin": "^( *)(RUN)\\b(.*)$",
+      "while": "^(?:\\1 {4}|[ \\t]*$)",
+      "beginCaptures": {
+        "2": {
+          "name": "keyword.control.flow.run"
+        },
+        "3": {
+          "patterns": [
+            {
+              "include": "#inline"
+            }
+          ]
+        }
+      },
+      "contentName": "string.unquoted.block.flow"
+    },
+    {
+      "begin": "^( *)(DO)\\b(?!.*\"\"\")(.*)$",
+      "beginCaptures": {
+        "2": {
+          "name": "keyword.control.flow.do"
+        },
+        "3": {
+          "patterns": [
+            {
+              "include": "#inline"
+            }
+          ]
+        }
+      },
+      "patterns": [
+        {
+          "include": "#inline"
+        }
+      ],
+      "end": "^(?!\\1 {4}(?! )\\S)"
+    },
+    {
+      "begin": "^( *)(PRINT)\\b(?!.*\"\"\")(.*)$",
+      "beginCaptures": {
+        "2": {
+          "name": "keyword.control.flow.print"
+        },
+        "3": {
+          "patterns": [
+            {
+              "include": "#inline"
+            }
+          ]
+        }
+      },
+      "patterns": [
+        {
+          "include": "#inline"
+        }
+      ],
+      "end": "^(?!\\1 {4}(?! )\\S)"
+    },
+    {
+      "match": "^ *(DO)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.do"
+        }
+      }
+    },
+    {
+      "match": "^ *(PRINT)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.print"
+        }
+      }
+    },
+    {
+      "match": "^ *(AS) +(COMMAND) +([A-Z][A-Z0-9_]*) *$",
+      "captures": {
+        "1": {
+          "name": "keyword.other.flow"
+        },
+        "2": {
+          "name": "storage.type.function.flow"
+        },
+        "3": {
+          "name": "entity.name.function.flow"
+        }
+      }
+    },
+    {
+      "match": "^ *(SET|ASYNC|AWAIT) +([a-z][a-z0-9_]*)",
+      "captures": {
+        "1": {
+          "patterns": [
+            {
+              "match": "SET",
+              "name": "keyword.control.flow.set"
+            },
+            {
+              "match": "ASYNC",
+              "name": "keyword.control.flow.async"
+            },
+            {
+              "match": "AWAIT",
+              "name": "keyword.control.flow.await"
+            }
+          ]
+        },
+        "2": {
+          "name": "variable.other.flow"
+        }
+      }
+    },
+    {
+      "match": "^ *(USE) +(.+?\\.md(?:#[^\\r\\n]+?)?) +(AS) +([a-z][a-z0-9_]*) *$",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.use"
+        },
+        "2": {
+          "name": "markup.underline.link.flow"
+        },
+        "3": {
+          "name": "keyword.other.flow"
+        },
+        "4": {
+          "name": "variable.other.flow"
+        }
+      }
+    },
+    {
+      "match": "^ *(USE) +(.+?\\.flow) *$",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.use"
+        },
+        "2": {
+          "name": "markup.underline.link.flow"
+        }
+      }
+    },
+    {
+      "match": "^ *(ASK)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.ask"
+        }
+      }
+    },
+    {
+      "match": "^ *(SET)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.set"
+        }
+      }
+    },
+    {
+      "match": "^ *(USE)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.use"
+        }
+      }
+    },
+    {
+      "match": "^ *(IF)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.if"
+        }
+      }
+    },
+    {
+      "match": "^ *(ELSE)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.else"
+        }
+      }
+    },
+    {
+      "match": "^ *(REPEAT)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.repeat"
+        }
+      }
+    },
+    {
+      "match": "^ *(WHILE)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.while"
+        }
+      }
+    },
+    {
+      "match": "^ *(CONTINUE)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.continue"
+        }
+      }
+    },
+    {
+      "match": "^ *(BREAK)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.break"
+        }
+      }
+    },
+    {
+      "match": "^ *(RETURN)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.return"
+        }
+      }
+    },
+    {
+      "match": "^ *(ASYNC)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.async"
+        }
+      }
+    },
+    {
+      "match": "^ *(AWAIT)\\b",
+      "captures": {
+        "1": {
+          "name": "keyword.control.flow.await"
+        }
+      }
+    },
+    {
+      "include": "#binding"
+    },
+    {
+      "match": "^ *(AS) +([a-z][a-z0-9_]*) *$",
+      "captures": {
+        "1": {
+          "name": "keyword.other.flow"
+        },
+        "2": {
+          "name": "variable.other.flow"
+        }
+      }
+    },
+    {
+      "match": "^ *([A-Z][A-Z0-9_]*)\\b",
+      "captures": {
+        "1": {
+          "name": "entity.name.function.flow"
+        }
+      }
+    },
+    {
+      "include": "#inline"
+    }
+  ],
+  "repository": {
+    "string": {
+      "name": "string.quoted.double.flow",
+      "begin": "\"",
+      "end": "\"|$",
+      "patterns": [
+        {
+          "name": "constant.character.escape.flow",
+          "match": "\\\\(?:[\"\\\\/bfnrt]|u[0-9A-Fa-f]{4})"
+        }
+      ]
+    },
+    "reference": {
+      "name": "variable.other.reference.flow",
+      "match": "@[a-z][a-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*\\b"
+    },
+    "binding": {
+      "match": "\\b(AS) +([a-z][a-z0-9_]*) *$",
+      "captures": {
+        "1": {
+          "name": "keyword.other.flow"
+        },
+        "2": {
+          "name": "variable.other.flow"
+        }
+      }
+    },
+    "value": {
+      "patterns": [
+        {
+          "name": "constant.language.flow.true",
+          "match": "\\bTRUE\\b"
+        },
+        {
+          "name": "constant.language.flow.false",
+          "match": "\\bFALSE\\b"
+        },
+        {
+          "name": "constant.language.flow.null",
+          "match": "\\bNULL\\b"
+        },
+        {
+          "name": "constant.numeric.flow",
+          "match": "(?<![\\w.@])-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b"
+        },
+        {
+          "name": "keyword.operator.flow",
+          "match": "\\b(?:AND|OR|NOT)\\b|==|!=|<=|>=|[=<>+\\-]"
+        },
+        {
+          "name": "punctuation.section.flow",
+          "match": "[()\\[\\]{},:]"
+        }
+      ]
+    },
+    "inline": {
+      "patterns": [
+        {
+          "include": "#triple-string"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#reference"
+        },
+        {
+          "include": "#binding"
+        },
+        {
+          "include": "#value"
+        },
+        {
+          "name": "keyword.other.flow",
+          "match": "\\b(?:AS|TIMES)\\b"
+        }
+      ]
+    },
+    "triple-string": {
+      "name": "string.quoted.triple.flow",
+      "begin": "\"\"\"",
+      "end": "\"\"\""
+    }
+  }
+}

@@ -1,46 +1,78 @@
-# Set up the Flow extension in Cursor
+# Set up Flow authoring
 
-Use only for requested editor installation or highlighting/icon work. Installing
-highlighting does not authorize running a Flow program.
+Use this guide only when the user asks to install or configure Flow editor
+support. Installing the extension does not authorize executing a Flow program.
 
-The bundled [Flow Syntax 0.1.13 VSIX](../assets/flow-syntax-0.1.13.vsix) is a
-platform-neutral editor extension. It highlights Markdown `flow` fences
-and `.flow` files, with distinct colors for the 17 commands and TRUE/FALSE/NULL values.
-USE filenames have a blue underline like Markdown links. Command-click on macOS or
-Ctrl-click on Windows/Linux opens the referenced file, relative to its containing file.
-The editor's configured link modifier applies; navigation never executes Flow.
-It does not execute programs and needs no Node.js runtime. Markdown retains Markdown mode.
+The bundled [Flow 0.2.5 VSIX](../assets/flow-0.2.5.vsix) supports
+Cursor and VS Code. It provides syntax highlighting and indentation for `.flow`
+files and Markdown `flow` fences, plus navigation for literal `USE` paths. It
+does not execute, validate, or format Flow programs and has no runtime
+dependencies.
 
 ## Install
 
-1. Resolve the bundled VSIX to its absolute path. Use the user's requested
-   Cursor installation/profile. Respect host permissions; do not change PATH.
-2. If Cursor CLI is available, run `cursor --install-extension ABSOLUTE_VSIX`.
-   Replace ABSOLUTE_VSIX with one literal argument; use the actual resolved CLI
-   path. Use `--force` only for an authorized replacement. Do not downgrade an
-   installed newer version without an explicit request.
-3. Otherwise use Cursor's **Extensions: Install from VSIX...** and choose the
-   bundled asset. Do not fetch an unrelated extension or fabricate success.
-4. Verify `inux.flow-syntax@0.1.13` through CLI extension listing or installed
-   manifest. Installation metadata may differ from the source manifest.
-   Recommend **Developer: Reload Window** if open files have not refreshed.
+1. Confirm whether the target is Cursor or VS Code and whether the user wants a
+   particular editor profile. Resolve the bundled VSIX to an absolute path.
+2. Check the installed version when the editor CLI is available:
 
-## Highlighting and icons
+   ```sh
+   cursor --list-extensions --show-versions
+   code --list-extensions --show-versions
+   ```
 
-Confirm the file language mode and a `flow` fence in Markdown. For color issues,
-inspect only relevant `editor.tokenColorCustomizations` rules: existing user
-rules can override the extension's defaults. Preserve unrelated theme settings;
-report whether you verified registration/tokenization or actual rendered colors.
+   The extension identifier is `vinodliyanage.flow`. If version `0.2.5` is
+   already active, do not reinstall it. Never replace a newer version unless
+   the user explicitly requests a downgrade.
+3. Install the VSIX using the CLI for the requested editor, passing its absolute
+   path as one argument:
 
-If file icons are requested and Material Icon Theme is installed, associate
-`*.flow` with its existing `flow` icon using
-`material-icon-theme.files.associations`. Merge this entry while preserving
-existing settings/comments. Confirm the icon asset and generated mapping;
-do not silently switch the user's icon theme.
+   ```sh
+   cursor --install-extension /absolute/path/flow-0.2.5.vsix
+   code --install-extension /absolute/path/flow-0.2.5.vsix
+   ```
 
-The repository extension source is `extensions/flow-syntax`. When rebuilding
-it, refresh the bundled VSIX and this version reference together. The installed
-skill uses its own bundled asset and requires no repository checkout.
+   When a named profile is required and the editor supports it, include that
+   profile explicitly. Do not change the user's `PATH`, profile, settings, or
+   other extensions unless requested.
+4. If the editor CLI is unavailable, open the Command Palette, run
+   **Extensions: Install from VSIX...**, and select the bundled file. Do not
+   download or substitute another extension.
+5. Verify `vinodliyanage.flow@0.2.5` in the requested editor/profile. Reload the
+   editor window when open files do not refresh.
 
-Sources: [Cursor extension installation](https://cursor.com/docs/configuration/extensions)
-and [Material Icon Theme associations](https://github.com/material-extensions/vscode-material-icon-theme#file-icons).
+## Verify authoring support
+
+Open a `.flow` file and confirm its language mode is **Flow**. Verify that known
+commands are highlighted and that Command-click on macOS or Ctrl-click on
+Windows/Linux opens a literal `USE` target relative to the containing file.
+Markdown must remain in Markdown mode while fenced `flow` blocks are highlighted.
+Navigation opens referenced files; it never executes them.
+
+If highlighting differs from the defaults, inspect only relevant theme token
+overrides. Preserve unrelated editor settings and report whether verification
+covered extension registration, tokenization, navigation, or actual rendered
+colors.
+
+## Maintain the bundle
+
+The extension source is `extensions/flow` in the Flow repository. Only
+when the user asks to develop or rebuild the extension, run its existing
+workflow:
+
+```sh
+npm install
+npm test
+npm run package
+```
+
+Node.js and npm are development requirements only. A successful package build
+removes older VSIX files from `skills/flow/assets/` and copies the newly built
+version there. Update the filename and version references in this guide and the
+extension documentation when changing the extension version.
+
+The packaging command writes generated VSIX files to `extensions/flow/dist/`;
+that directory is ignored by Git and excluded from the packaged extension.
+
+Sources: [Cursor extensions](https://cursor.com/docs/configuration/extensions),
+[VS Code VSIX installation](https://code.visualstudio.com/docs/configure/extensions/extension-marketplace#_install-from-a-vsix),
+and [VS Code extension CLI](https://code.visualstudio.com/docs/configure/command-line#_working-with-extensions).

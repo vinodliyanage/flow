@@ -1,9 +1,11 @@
 {
-  "name": "flow-syntax",
-  "displayName": "Flow Syntax",
-  "description": "Highlight Flow instructions and open referenced Flow files from Markdown or .flow files.",
-  "version": "0.1.13",
-  "publisher": "inux",
+  "name": "flow",
+  "displayName": "Flow",
+  "description": "Highlight the Flow language specification and navigate USE references in .flow and Markdown files.",
+  "version": "0.2.5",
+  "publisher": "vinodliyanage",
+  "author": "Vinod Liyanage",
+  "icon": "images/icon.png",
   "private": true,
   "license": "UNLICENSED",
   "engines": {
@@ -18,15 +20,19 @@
     "syntax"
   ],
   "scripts": {
-    "package": "vsce package --no-dependencies --allow-missing-repository --skip-license"
+    "package": "vsce package --out dist/flow-$npm_package_version.vsix --no-dependencies --allow-missing-repository --skip-license",
+    "postpackage": "node scripts/sync-vsix.js",
+    "test": "node --test test/*.test.js"
   },
   "devDependencies": {
-    "@vscode/vsce": "2.32.0"
+    "@vscode/vsce": "2.32.0",
+    "vscode-textmate": "9.2.0",
+    "vscode-oniguruma": "1.7.0"
   },
   "contributes": {
     "languages": [
       {
-        "id": "inux-flow",
+        "id": "flow",
         "aliases": [
           "Flow",
           "flow"
@@ -39,22 +45,18 @@
     ],
     "grammars": [
       {
-        "language": "inux-flow",
-        "scopeName": "source.inux-flow",
-        "path": "./syntaxes/flow.tmLanguage.json",
-        "embeddedLanguages": {
-          "meta.embedded.block.javascript": "javascript"
-        }
+        "language": "flow",
+        "scopeName": "source.flow",
+        "path": "./syntaxes/flow.tmLanguage.json"
       },
       {
-        "scopeName": "markdown.inux-flow",
+        "scopeName": "markdown.flow",
         "path": "./syntaxes/flow-markdown.tmLanguage.json",
         "injectTo": [
           "text.html.markdown"
         ],
         "embeddedLanguages": {
-          "meta.embedded.block.inux-flow": "inux-flow",
-          "meta.embedded.block.javascript": "javascript"
+          "meta.embedded.block.flow": "flow"
         }
       }
     ],
@@ -76,27 +78,6 @@
             }
           },
           {
-            "name": "Flow: RULES",
-            "scope": "keyword.control.flow.rules",
-            "settings": {
-              "foreground": "#C8A2C8"
-            }
-          },
-          {
-            "name": "Flow: FINALLY",
-            "scope": "keyword.control.flow.finally",
-            "settings": {
-              "foreground": "#DBBFA8"
-            }
-          },
-          {
-            "name": "Flow: THINK",
-            "scope": "keyword.control.flow.think",
-            "settings": {
-              "foreground": "#C099FF"
-            }
-          },
-          {
             "name": "Flow: DO",
             "scope": "keyword.control.flow.do",
             "settings": {
@@ -104,17 +85,17 @@
             }
           },
           {
-            "name": "Flow: SHELL",
-            "scope": "keyword.control.flow.shell",
+            "name": "Flow: PRINT",
+            "scope": "keyword.control.flow.print",
             "settings": {
-              "foreground": "#D19A66"
+              "foreground": "#F0D060"
             }
           },
           {
-            "name": "Flow: RUN",
-            "scope": "keyword.control.flow.run",
+            "name": "Flow: CONTEXT",
+            "scope": "keyword.control.flow.context",
             "settings": {
-              "foreground": "#C678DD"
+              "foreground": "#C099FF"
             }
           },
           {
@@ -122,21 +103,6 @@
             "scope": "keyword.control.flow.use",
             "settings": {
               "foreground": "#7DCFFF"
-            }
-          },
-          {
-            "name": "Flow: referenced file",
-            "scope": "markup.underline.link.flow",
-            "settings": {
-              "foreground": "#61AFEF",
-              "fontStyle": "underline"
-            }
-          },
-          {
-            "name": "Flow: CHECK",
-            "scope": "keyword.control.flow.check",
-            "settings": {
-              "foreground": "#98C379"
             }
           },
           {
@@ -161,6 +127,41 @@
             }
           },
           {
+            "name": "Flow: WHILE",
+            "scope": "keyword.control.flow.while",
+            "settings": {
+              "foreground": "#F78C6C"
+            }
+          },
+          {
+            "name": "Flow: CONTINUE",
+            "scope": "keyword.control.flow.continue",
+            "settings": {
+              "foreground": "#98C379"
+            }
+          },
+          {
+            "name": "Flow: BREAK",
+            "scope": "keyword.control.flow.break",
+            "settings": {
+              "foreground": "#FF6B6B"
+            }
+          },
+          {
+            "name": "Flow: RETURN",
+            "scope": "keyword.control.flow.return",
+            "settings": {
+              "foreground": "#FF5370"
+            }
+          },
+          {
+            "name": "Flow: RUN",
+            "scope": "keyword.control.flow.run",
+            "settings": {
+              "foreground": "#C678DD"
+            }
+          },
+          {
             "name": "Flow: ASYNC",
             "scope": "keyword.control.flow.async",
             "settings": {
@@ -168,17 +169,39 @@
             }
           },
           {
-            "name": "Flow: WAIT",
-            "scope": "keyword.control.flow.wait",
+            "name": "Flow: AWAIT",
+            "scope": "keyword.control.flow.await",
             "settings": {
               "foreground": "#73DACA"
             }
           },
           {
-            "name": "Flow: STOP",
-            "scope": "keyword.control.flow.stop",
+            "name": "Flow: declared labels",
+            "scope": "variable.other.flow",
             "settings": {
-              "foreground": "#FF5370"
+              "foreground": "#9CDCFE"
+            }
+          },
+          {
+            "name": "Flow: label references",
+            "scope": "variable.other.reference.flow",
+            "settings": {
+              "foreground": "#9CDCFE"
+            }
+          },
+          {
+            "name": "Flow: custom command names",
+            "scope": "entity.name.function.flow",
+            "settings": {
+              "foreground": "#DCDCAA"
+            }
+          },
+          {
+            "name": "Flow: referenced file",
+            "scope": "markup.underline.link.flow",
+            "settings": {
+              "foreground": "#61AFEF",
+              "fontStyle": "underline"
             }
           },
           {
@@ -201,13 +224,6 @@
             "settings": {
               "foreground": "#FFD580"
             }
-          },
-          {
-            "name": "Flow: PRINT",
-            "scope": "keyword.control.flow.print",
-            "settings": {
-              "foreground": "#F0D060"
-            }
           }
         ]
       }
@@ -215,7 +231,7 @@
   },
   "main": "./extension.js",
   "activationEvents": [
-    "onLanguage:inux-flow",
+    "onLanguage:flow",
     "onLanguage:markdown"
   ],
   "extensionKind": [

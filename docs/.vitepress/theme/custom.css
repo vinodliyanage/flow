@@ -1,0 +1,39 @@
+:root {
+  --vp-c-brand-1: #3157d5;
+  --vp-c-brand-2: #2648bb;
+  --vp-c-brand-3: #1f3b99;
+  --vp-c-brand-soft: rgba(49, 87, 213, 0.14);
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #3157d5 15%, #00a6a6);
+  --vp-home-hero-image-background-image: linear-gradient(135deg, rgba(49, 87, 213, 0.24), rgba(0, 166, 166, 0.18));
+  --vp-home-hero-image-filter: blur(44px);
+  --vp-code-block-color: #d7dae0;
+  --vp-code-block-bg: #161618;
+  --vp-code-block-divider-color: #2b2b30;
+  --vp-code-line-number-color: #7f848e;
+  --vp-code-copy-code-border-color: #3a3a40;
+  --vp-code-copy-code-bg: #242428;
+  --vp-code-copy-code-hover-border-color: #55555d;
+  --vp-code-copy-code-hover-bg: #303036;
+  --vp-code-copy-code-active-text: #d7dae0;
+}
+
+.dark {
+  --vp-c-brand-1: #8ca7ff;
+  --vp-c-brand-2: #6f8ff5;
+  --vp-c-brand-3: #5575d9;
+  --vp-c-brand-soft: rgba(140, 167, 255, 0.16);
+}
+
+.VPHomeHero .image-src {
+  width: min(240px, 55vw);
+  height: min(240px, 55vw);
+}
+
+.vp-doc div[class*='language-flow'] code {
+  font-size: 0.9em;
+}
+
+.vp-doc div[class*='language-'] > span.lang {
+  color: #7f848e;
+}

@@ -1,27 +1,32 @@
 ---
 name: flow
-description: Author, review, or execute .flow files and Markdown flow blocks, including workflows referenced by other skills. Also set up Flow syntax highlighting in Cursor. Discovery never authorizes execution.
+description: Convert prompts into Flow; author, review, validate, or execute Flow programs; and set up Flow syntax support in Cursor or VS Code.
 metadata:
   author: "Vinod Liyanage"
-  version: "0.1.13"
+  version: "0.2.4"
 ---
 
 # Flow
 
-Before authoring, reviewing, validating, or executing Flow, read the complete
-[interpreter](references/interpreter.md). Reuse it only while its complete current
-contents remain in context; reload after context loss/compaction if incomplete.
-If unreadable, stop. Never execute from a summary, remembered syntax, or examples.
-Apply this gate in every chat and agent handling Flow; include the skill path
-and loading requirement when delegating. Delegation does not authorize execution.
+Before any Flow work, read the complete current
+[interpreter](references/interpreter.md). If it is unavailable or incomplete,
+stop. Reload it after context loss; never work from memory, examples, or a
+summary.
 
-| Request | Read |
-| --- | --- |
-| Author or convert | [Conversion](references/conversion.md) after interpreter |
-| Execute or review | Interpreter above |
-| Cursor highlighting/icons | [Extension setup](references/extension-setup.md) only |
+When converting a normal prompt or prose workflow into Flow, also read the
+complete [conversion guide](references/conversion.md). Do not load that guide
+for execution, review, or other Flow work unless conversion is requested.
 
-Load only the selected program and USE children when reached. Authoring, review,
-and discovery cause no workflow effects; editor setup changes only requested
-configuration. Do not create helpers, generators, test scripts, or extra artifacts
-unless requested.
+When setting up Flow authoring, syntax highlighting, or `USE` navigation in
+Cursor or VS Code, read the complete
+[extension setup guide](references/extension-setup.md). Do not load it for
+ordinary Flow work.
+
+Execute a Flow only when the user explicitly asks to run it. Authoring,
+reviewing, validating, discovering, or opening a Flow does not authorize
+execution.
+
+During execution, load only the selected program and each `USE` dependency when
+it is reached. Perform no action outside the current Flow instruction. Do not
+create helpers, scripts, files, retries, repairs, or extra work unless the Flow
+explicitly instructs you to do so.
