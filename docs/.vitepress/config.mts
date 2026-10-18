@@ -161,6 +161,13 @@ export default defineConfig({
     },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/vinodliyanage/flow' },
+      {
+        icon: {
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 1 22 22" style="fill:none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9" r="3"/><path d="M5.5 19.5a6.5 6.5 0 0 1 13 0"/></svg>',
+        },
+        link: 'https://vinodliyanage.me',
+        ariaLabel: 'Vinod Liyanage portfolio',
+      },
     ],
     editLink: {
       pattern: 'https://github.com/vinodliyanage/flow/edit/main/docs/:path',
