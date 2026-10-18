@@ -1,68 +1,40 @@
-# Syntax
+---
+description: Learn Flow indentation, bindings, strings, plain-English conditions, and exact or composed PRINT output.
+---
 
-[Flow](flow-language.md) · [Quick start](quick-start.md)
+# Syntax and values
 
-Flow is designed to be read from top to bottom. Most lines say one thing. Four
-spaces show the few places where the path branches, repeats, or contains literal
-text.
+A Flow program combines command keywords, ordinary task text, and values.
+This guide explains how to read and write those parts. For the formal forms
+and known specification gaps, see the [language specification](specification.md).
 
-## A file at a glance
+## Instructions and indentation
 
 ```flow
-# Values can be stored and reused.
-SET limit = 3
-
-ASK "How many items should I review?" AS count
-IF @count == ""
-    RETURN "A count is required."
-
-DO Review up to @limit items requested by @count. AS review
-PRINT @review
+ASK "What is your name?" AS name
+IF @name is an empty string
+    RETURN "A name is required."
+PRINT @name
 ```
 
-Commands are uppercase. Bindings such as `limit` and `review` hold values;
-references such as `@limit` read them.
+The uppercase word starts an instruction. Four spaces put `RETURN` inside
+the `IF` body. `PRINT` is back at the outer level, so it runs after the branch
+unless the program has already returned. Blocks have no trailing colon or
+closing keyword. Every block needs a body.
 
-## Layout keeps the path visible
+Save one program in a `.flow` file, or place it in a fenced `flow` block in
+Markdown. When Markdown contains several blocks, the execution request must
+identify the selected program. Blank lines separate instructions visually;
+they do not execute. Use spaces for structural indentation.
 
-Use uppercase commands and four spaces for each indentation level.
-A block must have a body. Dedenting closes it; block headers have no colon
-or closing keyword. Semicolon separators are not supported.
+## Bindings hold values
 
-Each `.flow` file contains one flow. Markdown can contain a fenced `flow` block.
-Blank lines are optional. Tabs are allowed only in literal bodies and raw strings.
-
-Write one instruction per line, except for prose continuations, literal bodies,
-and multiline strings. Ordinary strings and expressions stay on one line, except
-for triple-quoted string values. Block and RUN headers stay single-line; pass
-multiline values through bindings.
-
-## Comments
+`AS name` saves an instruction's result. `@name` reads it. Use `SET` when you
+already have a value or want an exact calculation:
 
 ```flow
-# One-line comment.
-###
-A comment across
-several lines.
-###
-```
-
-Comments may be indented. Inline comments are unsupported. Multiline comments
-do not nest and must close. Comment markers inside strings or literal bodies
-are ordinary text.
-
-## Values and references
-
-`AS name` stores a result in a binding. `@name` reads it; `@order.total` reads
-an object field. This lets one instruction hand real data to the next without
-copying it into another prompt.
-Names start with a lowercase letter and contain lowercase letters, digits, or
-underscores. They are case-sensitive. Rebinding replaces the previous value
-after the new instruction succeeds.
-
-```flow
-SET name = "Ana"
-SET count = 3
+SET count = 2
+SET count = @count + 1
 SET approved = TRUE
 SET result = NULL
 SET names = ["Ana", "Vinod"]
@@ -70,14 +42,21 @@ SET order = {"total": 25, "currency": "USD"}
 PRINT @order.total
 ```
 
-Unknown bindings and missing fields are errors. References in task prose supply
-data; their values never become Flow instructions. In expressions, `"@name"`
-is literal text.
+Names start with a lowercase letter and contain lowercase letters, digits,
+or underscores. Creating `count` again replaces its old value after the new
+instruction succeeds. Reading an unknown name or missing field is an error.
 
-## Strings
+An `ASK` reply is always text. If a user types `3`, the binding contains the
+string `"3"`, not the number `3`. Convert it through an explicit task or process
+before numeric use; the language has no built-in conversion function.
 
-Ordinary strings use double quotes and JSON escapes, such as `"line one\nline two"`.
-Use triple double quotes when the text should stay exactly as written:
+## Strings and literal text
+
+Quote fixed strings with double quotes. Ordinary strings use JSON escapes:
+`"first\nsecond"` contains a newline. `"@name"` is the literal text `@name`.
+It does not read the binding.
+
+Use triple quotes for raw multiline text:
 
 ```flow
 SET message = """First line.
@@ -86,56 +65,94 @@ Second line with "quotes", @name, and # literal text.
 PRINT @message
 ```
 
-Everything between `"""` delimiters stays unchanged: indentation, blank lines,
-tabs, backslashes, and leading or trailing newlines. There is no escape processing,
-interpolation, comment parsing, or instruction execution. The next `"""` closes
-the string; a missing closer is an error.
+Everything between the delimiters is preserved, including whitespace and line
+breaks. No interpolation, escape processing, or comment parsing occurs there.
 
-Use multiline strings wherever a string value is accepted, including ASK, SET,
-PRINT, and custom command inputs. The instruction counts once. Block and RUN
-headers remain single-line; pass multiline values through bindings.
-
-## Expressions
-
-Expressions handle small, exact decisions. Keep work that needs judgment inside
-`DO` or a natural-language condition.
-
-Operators are listed from highest to lowest precedence:
-
-| Operators | Meaning |
-| --- | --- |
-| `(...)`, field access | Grouping and object fields. |
-| `+`, `-` | Numeric arithmetic. |
-| `==`, `!=`, `<`, `<=`, `>`, `>=` | Comparisons. |
-| `NOT` | Boolean negation. |
-| `AND` | Boolean and. |
-| `OR` | Boolean or. |
-
-There is no implicit type conversion. Arithmetic needs numbers; Boolean
-operators need Booleans. Ordered comparisons need two numbers or two strings.
-Strings are case-sensitive. Equality requires matching types and compares
-arrays and objects structurally. Type mismatches are errors.
-
-AND and OR short-circuit. Chained comparisons are unsupported; join separate
-comparisons with AND. Evaluate expressions precisely, using code when needed.
-There are no built-in functions such as `trim()` or `JSON()`; use DO, RUN, or
-a custom command.
-
-## Long prose and literal bodies
-
-When a task needs a little more detail, continue `DO` or prose `PRINT` one level
-deeper without a blank line:
+`CONTEXT` stores a literal indented body. `RUN` passes one to a process as stdin.
+They remove one structural indentation level and preserve the remaining text:
 
 ```flow
-DO Write a greeting for @name.
-    Keep it short and friendly. AS greeting
+CONTEXT
+    Write a short greeting.
+    The text @name here is literal, not a reference.
+AS guidelines
+DO Write a greeting for Ana following @guidelines. AS greeting
+PRINT @greeting
 ```
 
-Continuation lines are prose, not nested instructions. Join them with single
-spaces; put optional `AS name` at the end of the final line.
+## Exact output and composed responses
 
-CONTEXT and RUN bodies are literal. Remove one structural indentation level;
-preserve remaining whitespace and line breaks. Commands, references, and
-comments inside them are data, with no interpolation.
+`PRINT` supports both fixed output and an instruction to compose a response:
 
-Next, see what each verb does in the [command reference](commands.md).
+```flow
+SET name = "Ana"
+PRINT "Hello:" @name
+PRINT Say hello to @name.
+```
+
+The first line of output is exactly `Hello: Ana`. The second `PRINT` asks the
+agent to generate a greeting, so its wording can vary. Exact parts can be
+literals or standalone references. They are rendered in order, separated by
+one space, in a single message. Strings keep their contents; other values
+render as JSON.
+
+A single exact expression still works: `PRINT @count + 1` displays the
+calculation. Quoted references stay literal: `PRINT "@name"` displays `@name`.
+The [PRINT reference](commands.md#print) defines how the written input selects
+exact output or prose. Malformed exact input is an error, not a prose request.
+
+## Long task text
+
+Continue `DO` or prose `PRINT` one level deeper on immediately following lines:
+
+```flow
+DO Explain the ASK command in one sentence.
+    Use simple language and return a string. AS explanation
+PRINT @explanation
+```
+
+The second line extends the task. It is not a nested instruction. Continuation
+lines join with spaces; the optional `AS` suffix belongs at the end of the
+complete task. Use a literal body or raw string when line breaks must survive.
+
+## Conditions in plain English
+
+`IF` and `WHILE` accept ordinary English conditions. Prefer a clear sentence
+when it expresses the decision naturally:
+
+```flow
+SET count = 2
+IF @count is greater than 0 and less than 5
+    PRINT "Within range."
+```
+
+English also works for precise text checks: `IF @answer is exactly "yes"`.
+State the intended meaning clearly. Saying `is an empty string` tests zero
+characters; saying `contains only whitespace` describes a different condition.
+
+A condition can describe a judgment over available evidence, such as
+`IF @review identifies blocking issues`. Its result must be determinable;
+missing evidence stops execution. The condition does not authorize additional
+unstated work.
+
+Exact arithmetic and Boolean expressions remain available. They are useful
+when symbolic notation communicates a calculation or condition more precisely.
+There is no implicit type conversion. See the
+[expression reference](specification.md#_5-expressions-and-conditions) for the
+complete operator list and evaluation rules.
+
+## Comments
+
+```flow
+# A one-line comment.
+###
+A multiline comment.
+Nothing inside it executes.
+###
+PRINT "Ready."
+```
+
+Multiline comments must close and do not nest. Inline comments are unsupported.
+Comment markers inside strings or literal bodies remain data.
+
+Look up individual instructions in the [command reference](commands.md).

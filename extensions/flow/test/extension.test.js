@@ -100,6 +100,28 @@ test('labels, references, commands, and quoted strings have explicit default col
   assert.equal(colorFor('meta.literal.block.flow'), undefined);
 });
 
+test('exact PRINT parts and prose PRINT highlight in Flow files and Markdown fences', () => {
+  for (const source of ['PRINT "Hello:" @name', 'PRINT Say hello to @name.']) {
+    for (const [grammar, text, line] of [
+      [flow, source, 0],
+      [markdown, ['```flow', source, '```'].join('\n'), 1]
+    ]) {
+      const tokens = tokenize(grammar, text)[line];
+      assert.ok(hasScope(tokens, 'keyword.control.flow.print'));
+      assert.ok(scopes(tokens, source.indexOf('@name')).includes('variable.other.reference.flow'));
+      if (source.includes('"Hello:"')) {
+        assert.ok(scopes(tokens, source.indexOf('Hello:')).includes('string.quoted.double.flow'));
+      }
+    }
+  }
+  const source = 'PRINT "Literal @name:" @name';
+  const tokens = tokenize(flow, source)[0];
+  assert.ok(!scopes(tokens, source.indexOf('@name')).includes('variable.other.reference.flow'));
+  assert.ok(scopes(tokens, source.lastIndexOf('@name')).includes('variable.other.reference.flow'));
+  assert.deepEqual(findUseReferences('PRINT "USE hidden.flow" @name\nUSE visible.flow')
+    .map(reference => reference.filename), ['visible.flow']);
+});
+
 test('CONTEXT and RUN bodies stay literal, then normal highlighting resumes', () => {
   const source = [
     'CONTEXT', '    USE hidden.flow', '    ###', '    @name', 'AS context',

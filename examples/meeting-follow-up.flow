@@ -1,0 +1,18 @@
+CONTEXT
+    Use only the supplied notes and clarifications.
+    Keep explicit decisions, action items, owners, and deadlines.
+    Mark missing information as unresolved; do not invent commitments.
+AS guidelines
+
+ASK "Paste the meeting notes." AS notes
+IF @notes is an empty string
+    RETURN "Meeting notes are required."
+
+DO Extract decisions and action items from @notes following @guidelines. AS actions
+
+IF @actions includes action items with missing owners or deadlines
+    PRINT List the missing owners and deadlines in @actions.
+    ASK "Provide the missing details, or say leave unresolved." AS clarification
+    DO Update @actions using @clarification and @guidelines. AS actions
+
+PRINT Turn @actions into a concise meeting follow-up, keeping unresolved items visible.

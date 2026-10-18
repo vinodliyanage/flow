@@ -1,7 +1,7 @@
 # Flow
 
 Syntax highlighting, indentation, and USE file navigation for Flow in Cursor
-and VS Code. The language specification is `docs/flow-language.md` at the
+and VS Code. The language specification is `docs/specification.md` at the
 repository root.
 Supports `.flow` files and Markdown `flow` fences. It does not execute, validate,
 or format programs.
@@ -20,10 +20,10 @@ remain overridable by the active theme.
 ## Install
 
 Run **Extensions: Install from VSIX...** and choose
-`dist/flow-0.2.7.vsix`, or:
+`skills/flow/assets/flow-0.2.7.vsix` from the repository root, or:
 
 ```sh
-cursor --install-extension /absolute/path/extensions/flow/dist/flow-0.2.7.vsix
+cursor --install-extension /absolute/path/to/flow/skills/flow/assets/flow-0.2.7.vsix
 ```
 
 Reload the window if open files have not refreshed. `.flow` uses **Flow** language

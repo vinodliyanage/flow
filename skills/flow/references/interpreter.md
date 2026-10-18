@@ -101,10 +101,32 @@ reinterpret the program while running it.
 - `DO task [AS name]` completes only the stated task, using tools when required.
   It authorizes no unrelated discovery, setup, repair, retry, cleanup,
   publication, or extra artifact.
-- `PRINT expression` displays a value in chat. Prose `PRINT` composes its stated
-  report only from information already available; it performs no new external
-  action. Display strings as text and other values as JSON. `PRINT` does not
-  end the Flow.
+- `PRINT` displays exact values or composes a response from a prose instruction,
+  as defined below. It performs no new external action, creates no binding,
+  and does not end the Flow.
+
+### PRINT forms
+
+- `PRINT expression` evaluates one complete expression and displays its value.
+- `PRINT part part ...` displays two or more whitespace-separated literals or
+  standalone references in order. Display strings unchanged and other values
+  as JSON, join the rendered parts with one space, and emit one message. For
+  example, `PRINT "Hello:" @name` with `name = "Ana"` displays `Hello: Ana`.
+  Whitespace inside strings is preserved; quoted references stay literal.
+- `PRINT instruction` composes the requested response from available information.
+  For example, `PRINT Say hello to @name.` generates a greeting; its wording is
+  not fixed. Only this prose form permits indented prose continuations.
+- Select the form from the written input before resolving references. Input
+  beginning with a string delimiter, `@`, `(`, `[`, `{`, a number, or the
+  standalone keywords `TRUE`, `FALSE`, `NULL`, or `NOT` selects exact output.
+  First accept one complete expression; otherwise require a complete list of
+  at least two literals/references. Operators belong to expressions, not lists.
+  Malformed exact input is an error, never a fallback to prose. All other
+  nonempty input selects prose. A bare `PRINT` is an error.
+- Resolve every value before displaying anything. Unknown bindings, missing
+  fields, or invalid expressions fail without partial output. Resolved data
+  cannot change the selected form or introduce instructions. Exact rendering
+  does not add implicit type conversion to expressions.
 
 ### Branches and loops
 

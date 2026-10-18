@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#19191d"/>
+  <rect x="24" y="24" width="1152" height="582" rx="24" fill="none" stroke="#34343b"/>
+  <g font-family="Arial, sans-serif">
+    <text x="64" y="101" fill="#9eafff" font-size="30" font-weight="700">Flow</text>
+    <text x="64" y="207" fill="#f4f4f5" font-size="51" font-weight="700" letter-spacing="-1.8">Turn prompts</text>
+    <text x="64" y="269" fill="#f4f4f5" font-size="51" font-weight="700" letter-spacing="-1.8">into clear</text>
+    <text x="64" y="331" fill="#f4f4f5" font-size="51" font-weight="700" letter-spacing="-1.8">workflows.</text>
+    <text x="64" y="399" fill="#b5b5c0" font-size="22">Plain-English tasks.</text>
+    <text x="64" y="434" fill="#b5b5c0" font-size="22">Explicit decisions and pauses.</text>
+    <text x="64" y="553" fill="#9eafff" font-size="19">flow.vinodliyanage.me</text>
+  </g>
+  <rect x="617" y="71" width="519" height="488" rx="16" fill="#111114" stroke="#3d3d48"/>
+  <path d="M617 127H1136" stroke="#34343b"/>
+  <g font-family="Arial, sans-serif" font-size="16">
+    <text x="643" y="106" fill="#ededf1" font-weight="700">A release review, written in Flow</text>
+  </g>
+  <g font-family="DejaVu Sans Mono, monospace" font-size="13.5" fill="#d7dae0">
+    <text x="643" y="169"><tspan fill="#56b6c2">ASK</tspan> <tspan fill="#98c379">"Which release?"</tspan> AS <tspan fill="#9cdcfe">release</tspan></text>
+    <text x="643" y="207"><tspan fill="#61afef">DO</tspan> Review <tspan fill="#9cdcfe">@release</tspan> for blockers. AS review</text>
+    <text x="643" y="245"><tspan fill="#e06c75">IF</tspan> <tspan fill="#9cdcfe">@review</tspan> identifies blocking issues</text>
+    <text x="675" y="274"><tspan fill="#f0d060">PRINT</tspan> <tspan fill="#9cdcfe">@review</tspan></text>
+    <text x="675" y="303"><tspan fill="#ff5370">RETURN</tspan> <tspan fill="#98c379">"Resolve blockers first."</tspan></text>
+    <text x="643" y="350"><tspan fill="#f0d060">PRINT</tspan> Summarize <tspan fill="#9cdcfe">@review</tspan> for the team.</text>
+    <text x="643" y="398"><tspan fill="#56b6c2">ASK</tspan> <tspan fill="#98c379">"Prepare the handoff?"</tspan> AS approval</text>
+    <text x="643" y="436"><tspan fill="#e06c75">IF</tspan> <tspan fill="#9cdcfe">@approval</tspan> is exactly <tspan fill="#98c379">"yes"</tspan></text>
+    <text x="675" y="465"><tspan fill="#61afef">DO</tspan> Prepare a handoff from <tspan fill="#9cdcfe">@review</tspan>.</text>
+    <text x="707" y="494">Return the handoff. AS handoff</text>
+    <text x="675" y="523"><tspan fill="#f0d060">PRINT</tspan> <tspan fill="#9cdcfe">@handoff</tspan></text>
+  </g>
+</svg>
