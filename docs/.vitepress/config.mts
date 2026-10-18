@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig, type HeadConfig } from 'vitepress'
 
 const extensionRoot = new URL('../../extensions/flow/', import.meta.url)
+const flowVersion = '0.1.0'
 const siteUrl = 'https://flow.vinodliyanage.me'
 const siteDescription = 'Turn traditional prompts into readable agent workflows with clear steps, English conditions, and explicit approval pauses.'
 const shareImage = `${siteUrl}/og-flow.png`
@@ -121,6 +122,7 @@ export default defineConfig({
       { text: 'Reference', link: '/commands' },
       { text: 'Specification', link: '/specification' },
       { text: 'Examples', link: '/examples' },
+      { text: `v${flowVersion}`, link: '/specification#language-version' },
     ],
     sidebar: [
       {
@@ -172,7 +174,7 @@ export default defineConfig({
       next: 'Next page',
     },
     footer: {
-      message: 'Flow documentation',
+      message: `Flow v${flowVersion} documentation`,
     },
   },
 })

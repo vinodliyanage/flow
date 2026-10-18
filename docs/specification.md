@@ -16,9 +16,11 @@ listed under [unresolved rules](#unresolved-rules). This is therefore a
 specification of the current documented language, not a complete parser or a
 claim that every implementation decision has been resolved.
 
-No independent language version is currently declared. The Flow skill and
-editor extension have package versions; those are not interchangeable language
-version numbers.
+## Language version
+
+This documentation describes **Flow v0.1.0**. The Flow skill and editor
+extension have their own package versions; those are separate from the
+language version.
 
 ## 1. Notation and terms
 
@@ -381,7 +383,7 @@ choose new behavior to fill them.
 | Custom command results | Which instructions produce results, particularly `SET`, compound bodies, and early `RETURN`. |
 | Task lifecycle | Exact meaning of top-level inside children/custom calls; scheduling, cancellation, settlement, and command-definition visibility. |
 | Instruction budget | Whether headers, task launches/joins, custom calls, and child invocations count in addition to body instructions. |
-| Version and conformance | A declared language version and executable conformance suite; the repository currently supplies an agent contract and editor tooling. |
+| Conformance | An executable conformance suite; the repository currently supplies an agent contract and editor tooling. |
 
 Authors can use the well-defined forms in the [command reference](commands.md).
 Implementers must resolve these gaps before claiming fully specified parsing
