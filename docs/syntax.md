@@ -17,7 +17,8 @@ IF @name is an empty string
 PRINT @name
 ```
 
-The uppercase word starts an instruction. Four spaces put `RETURN` inside
+An uppercase command usually starts an instruction; a lowercase label calls a
+defined function. Four spaces put `RETURN` inside
 the `IF` body. `PRINT` is back at the outer level, so it runs after the branch
 unless the program has already returned. Blocks have no trailing colon or
 closing keyword. Every block needs a body.
@@ -49,6 +50,10 @@ instruction succeeds. Reading an unknown name or missing field is an error.
 An `ASK` reply is always text. If a user types `3`, the binding contains the
 string `"3"`, not the number `3`. Convert it through an explicit task or process
 before numeric use; the language has no built-in conversion function.
+
+Define reusable operations with `COMMAND NAME` or `FUNCTION name` and an
+indented body. Call them with optional input and an optional `AS` result suffix.
+Both receive isolated local `@input`; see [reusing programs](reuse.md#functions).
 
 ## Strings and literal text
 

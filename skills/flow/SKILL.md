@@ -1,32 +1,21 @@
 ---
 name: flow
-description: Convert prompts into Flow; author, review, validate, or execute Flow programs; and set up Flow syntax support in Cursor or VS Code.
+description: Author, review, validate, or execute Flow; convert prompts; set up Flow in Cursor or VS Code.
 metadata:
   author: "Vinod Liyanage"
-  version: "0.2.4"
+  version: "0.3.0"
 ---
 
 # Flow
 
-Before any Flow work, read the complete current
-[interpreter](references/interpreter.md). If it is unavailable or incomplete,
-stop. Reload it after context loss; never work from memory, examples, or a
-summary.
+Read the complete current [interpreter](references/interpreter.md) before Flow
+work. Stop if unavailable/incomplete; reload after context loss. Never substitute
+memory, examples, or summaries.
 
-When converting a normal prompt or prose workflow into Flow, also read the
-complete [conversion guide](references/conversion.md). Do not load that guide
-for execution, review, or other Flow work unless conversion is requested.
+For prompt conversion, also read [conversion](references/conversion.md).
+For editor setup, also read [extension setup](references/extension-setup.md).
+Load these guides only for their corresponding tasks.
 
-When setting up Flow authoring, syntax highlighting, or `USE` navigation in
-Cursor or VS Code, read the complete
-[extension setup guide](references/extension-setup.md). Do not load it for
-ordinary Flow work.
-
-Execute a Flow only when the user explicitly asks to run it. Authoring,
-reviewing, validating, discovering, or opening a Flow does not authorize
-execution.
-
-During execution, load only the selected program and each `USE` dependency when
-it is reached. Perform no action outside the current Flow instruction. Do not
-create helpers, scripts, files, retries, repairs, or extra work unless the Flow
-explicitly instructs you to do so.
+Author plain command/function blocks and English conditions. Execute only on
+explicit request; authoring/review/validation never authorize a run. Perform only
+the current instruction; read imports only when reached. Add no unrequested work.

@@ -24,12 +24,14 @@ optional parts. Do not type those brackets. `body` means indented instructions;
 | [WHILE](#while) | Repeat while a condition is true. |
 | [CONTINUE](#continue) | Advance to the next loop iteration. |
 | [BREAK](#break) | Leave a loop. |
-| [USE](#use) | Read Markdown, run a child, or register a command. |
+| [USE](#use) | Read Markdown or run a child with shared state. |
+| [COMMAND](#command) | Define an uppercase reusable command. |
+| [FUNCTION](#function) | Define a reusable function with a lowercase label. |
 | [RUN](#run) | Launch a direct process. |
 | [ASYNC](#async) | Start an independent background task. |
 | [AWAIT](#await) | Join a task and expose its bindings. |
 | [RETURN](#return) | Exit the current invocation. |
-| [Custom command call](#custom-command-call) | Invoke a registered command with one value. |
+| [Custom command call](#custom-command-call) | Invoke a registered command or function with optional input. |
 
 ## ASK
 
@@ -37,8 +39,8 @@ optional parts. Do not type those brackets. `body` means indented instructions;
 ASK <string> AS <name>
 ```
 
-Display the question and wait for a fresh user reply. Store the raw answer as
-a string in `name`, including an empty answer. A later instruction on the same
+Display only the question verbatim and wait silently for a fresh user reply.
+Store the raw answer as a string in `name`, including an empty answer. A later instruction on the same
 path cannot start while the question is unanswered. Reaching `ASK` again asks
 again; previous answers are not reused.
 
@@ -66,9 +68,9 @@ PRINT @count
 ```
 
 **Binding:** `count` holds `3`. `SET` uses the name before `=`, rather than an
-`AS` suffix. Unknown references and invalid operand types are errors. The
-current contract does not explicitly define a separate `SET` instruction result
-for use as a custom command's final result; use a final `DO` for that purpose.
+`AS` suffix. Its instruction result is the stored value, so a final direct
+`SET` can supply a command or function's result. Unknown references and invalid
+operand types are errors.
 
 ## CONTEXT
 
@@ -290,8 +292,7 @@ The target determines the operation:
 | Target | Behavior | Data visible afterward |
 | --- | --- | --- |
 | Markdown file or heading section | Read text as data. | Text stored in the required `AS` binding. |
-| Ordinary `.flow` file | Read, validate, and run the child synchronously. | Caller and child share bindings. |
-| `.flow` command definition | Read, validate, and register the command without executing its body. | The command can be called. |
+| `.flow` file | Read, validate, and run the child synchronously. Reached declarations register reusable bodies. | Caller and child share bindings and callable registrations. |
 
 Paths are literal and resolve from the containing program's directory. `USE`
 does not change the process working directory. Read a child only when the
@@ -309,16 +310,65 @@ PRINT @greeting
 See [reusing programs](reuse.md) for complete child and custom-command examples
 and the Markdown section-selection rules.
 
+## COMMAND
+
+```text
+COMMAND <COMMAND_NAME>
+    <body>
+```
+
+Register an uppercase command when the declaration is reached. Its nonempty body
+does not execute until called. Definitions belong at file or selected-block top
+level and may appear alongside ordinary instructions.
+
+```flow
+COMMAND ADD_TWO
+    SET result = @input + 2
+
+ADD_TWO 3 AS total
+PRINT @total
+```
+
+**Result:** registration produces none. A call receives isolated local `@input`
+and may expose its final direct instruction's result. Duplicate or built-in
+names, nested definitions, and direct or indirect recursion fail. Legacy
+`AS COMMAND NAME` footers are errors.
+
+## FUNCTION
+
+```text
+FUNCTION <name>
+    <body>
+```
+
+Define a reusable function with a lowercase label matching `[a-z][a-z0-9_]*`.
+It follows the same registration, scope, input, and result rules as a command.
+Call its label as a standalone instruction; function calls are not expressions.
+
+```flow
+FUNCTION add_one
+    SET result = @input + 1
+
+add_one 4 AS next
+PRINT @next
+```
+
+**Result:** registration produces none; this call returns `5`. Commands and
+functions may call each other. Bare lowercase labels call functions, `@name`
+reads data, and `AWAIT name` joins tasks. `ASYNC name` retains its task-body
+syntax and launches immediately; it does not require `FUNCTION`.
+
 ## RUN
 
 ```text
 RUN <executable> [<arguments>]
-    <literal stdin body>
+[    <literal stdin body>]
 [AS <name>]
 ```
 
-Launch a direct process. The body becomes standard input; the optional `AS`
-line aligns with `RUN`. Keep the instruction active until the process exits.
+Launch a direct process. An optional literal body becomes standard input; the
+optional `AS` line follows and aligns with `RUN`, even without stdin. Keep the
+instruction active until the process exits.
 
 ```flow
 SET name = "Ana Maria"
@@ -353,8 +403,7 @@ AS status
 That example requires `sh`, Git, and a Git working directory. Processes use the
 host working directory and a default 30-second timeout. A nonzero exit, timeout,
 or missing executable fails the run. Available output is retained for reporting;
-whether a failed process updates its `AS` binding is currently
-[unresolved](specification.md#unresolved-rules).
+a failed instruction leaves its requested `AS` binding unchanged.
 
 ## ASYNC
 
@@ -365,7 +414,7 @@ ASYNC <task_name>
 
 Start the body as an independent background task and immediately advance the
 main path. The task runs its instructions sequentially, using an isolated
-snapshot of bindings taken at launch.
+snapshot of bindings and callable registrations taken at launch.
 
 ```flow
 ASYNC first
@@ -379,8 +428,9 @@ PRINT @second.greeting
 ```
 
 **Result:** a named task that can be joined with `AWAIT`. Task names are unique
-and cannot collide with bindings. `ASYNC` is top-level only. Its body cannot
-contain `ASK`, `USE`, `ASYNC`, or `AWAIT`.
+and cannot collide with bindings. `ASYNC` is at invocation top level, outside
+branches, loops, and tasks. Its body cannot perform `ASK`, `USE`, `ASYNC`, or
+`AWAIT`, including indirectly through function or command calls.
 
 Tasks must not depend on unfinished sibling results or concurrently change
 the same resource. If the host cannot run real background work, stop before
@@ -421,29 +471,31 @@ RETURN "Finished."
 ```
 
 **Result:** no returned data. In the root program, `RETURN` ends the run; in an
-ordinary child, it resumes the caller; in a task or custom command, it exits
+ordinary child, it resumes the caller; in a task, command, or function, it exits
 only that scope. Outstanding tasks settle before a scope exits.
 
-Use a quoted message, or omit it. The contract does not fully specify the
-allowed message expression forms. A message displayed by `RETURN` is not a
-custom command's return value.
+Use a string message, or omit it. A message displayed by `RETURN` is not a
+command or function's return value. A message-free `RETURN` and normal file end
+are silent.
 
 ## Custom command call
 
 ```text
-<COMMAND_NAME> <value> [AS <name>]
+<COMMAND_NAME> [<expression>] [AS <name>]
+<function_name> [<expression>] [AS <name>]
 ```
 
-Register a definition with `USE`, then pass one value to it as local `@input`.
-The invocation has isolated bindings. With `AS name`, its final executed
-instruction must produce a result to store in the caller. Without `AS`, discard
-the result.
+Reach a definition directly or through `USE`, then pass an optional expression
+as local `@input`. Evaluate it once in the caller; omitted input is `NULL`.
+The invocation has isolated bindings and inherited callable registrations.
+With `AS name`, its final direct instruction must produce a result to store in
+the caller. Without `AS`, discard the result.
 
 In `trim.flow`:
 
 ```flow
-DO Remove surrounding whitespace from @input and return the resulting string.
-AS COMMAND TRIM
+COMMAND TRIM
+    DO Remove surrounding whitespace from @input and return the resulting string.
 ```
 
 In the caller beside `trim.flow`:
@@ -454,7 +506,9 @@ TRIM "  Ana  " AS name
 PRINT @name
 ```
 
-**Result:** the final instruction's result, optionally stored in the caller.
+**Result:** the final direct instruction's result, optionally stored in the caller.
+A final `IF`, `PRINT`, or explicit `RETURN` provides no result; a bound call
+ending this way fails instead of reusing an earlier value.
 Unknown names, duplicate definitions, built-in name collisions, and recursive
 calls are errors. See [custom-command scope](reuse.md#custom-commands) before
 building larger definitions.

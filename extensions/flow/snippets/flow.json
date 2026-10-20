@@ -48,5 +48,23 @@
       "$0"
     ],
     "description": "Store literal background text in an aligned AS binding."
+  },
+  "FUNCTION definition": {
+    "prefix": "FUNCTION",
+    "body": [
+      "FUNCTION ${1:name}",
+      "    DO ${2:Describe the task for @input and return its result.}",
+      "$0"
+    ],
+    "description": "Define a reusable function with a lowercase label and isolated @input."
+  },
+  "COMMAND definition": {
+    "prefix": "COMMAND",
+    "body": [
+      "COMMAND ${1:NAME}",
+      "    DO ${2:Describe the task for @input and return its result.}",
+      "$0"
+    ],
+    "description": "Group instructions in a plain command block with isolated @input."
   }
 }

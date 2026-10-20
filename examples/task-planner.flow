@@ -1,0 +1,51 @@
+FUNCTION score_priority
+    IF @input is exactly "high"
+        SET score = 3
+    ELSE
+        IF @input is exactly "medium"
+            SET score = 2
+        ELSE
+            SET score = 1
+    DO Return @score unchanged.
+
+COMMAND READ_TASK
+    ASK "What is the task?" AS title
+    WHILE @title is empty or contains only whitespace
+        ASK "Please enter a task name." AS title
+
+    ASK "How many minutes will it take? Enter a whole number from 1 to 120." AS estimate
+    WHILE @estimate does not contain only decimal digits representing a number from 1 to 120
+        ASK "Please enter a whole number from 1 to 120 using digits only." AS estimate
+    DO Convert the decimal digits in @estimate to an integer. AS minutes
+
+    ASK "What is its priority? Enter high, medium, or low." AS priority
+    WHILE @priority is not exactly one of "high", "medium", or "low"
+        ASK "Please enter exactly high, medium, or low in lowercase." AS priority
+
+    score_priority @priority AS score
+    DO Return an object with fields title from @title, minutes from @minutes,
+        priority from @priority, and score from @score.
+
+PRINT "Let's plan three tasks."
+SET tasks = []
+SET total_minutes = 0
+SET task_number = 1
+
+REPEAT 3 TIMES
+    PRINT "Task" @task_number "of 3"
+    READ_TASK AS task
+    DO Return a new list containing all items in @tasks followed by @task. AS tasks
+    SET total_minutes = @total_minutes + @task.minutes
+    SET task_number = @task_number + 1
+
+DO Sort @tasks by score from highest to lowest, then minutes from lowest to highest.
+    Preserve entry order when both values match. AS ordered_tasks
+
+PRINT Write a numbered plan using only @ordered_tasks.
+    Show each task's title, priority, and estimated minutes.
+PRINT "Total estimated minutes:" @total_minutes
+
+IF @total_minutes is greater than 120
+    PRINT "This plan exceeds two hours. Consider moving a lower-priority task to another session."
+ELSE
+    PRINT "This plan fits within two hours."
