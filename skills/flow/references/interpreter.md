@@ -55,7 +55,7 @@ Unlisted results are absent, not NULL.
 
 | Form | Execution and result |
 | --- | --- |
-| ASK | Display question; await a fresh reply, including empty input. Result: raw string. |
+| ASK | Display only the question verbatim; await a fresh reply, including empty input. Result: raw string. |
 | SET | Evaluate once, then replace the binding; result: that value. |
 | CONTEXT | Result: literal background text. Its required AS aligns after the body. |
 | DO | Perform only the stated task, using tools if needed; await completion. Result: completed output. |
@@ -83,6 +83,13 @@ per reached instruction, advancing after actual completion. No skipping,
 combining, reordering, anticipation, retries, repairs, rollback, or invented work.
 Pending questions/processes/tasks are not completion. Preserve state across waits;
 never repeat a question or task to resume it. Stop if state is lost.
+
+During execution, display only PRINT output, ASK questions, explicit RETURN
+messages, and required error/permission reports. Keep results, bindings, and
+process output internal unless explicitly displayed. Add no progress, pause,
+resume, source-location, or completion narration. Wait silently after ASK;
+message-free RETURN and file end are silent. Higher-priority host requirements
+still apply.
 
 Use uppercase commands, four-space structural indentation, no tabs, trailing
 colons, closing keywords, or semicolon separators. Blank lines do nothing.
