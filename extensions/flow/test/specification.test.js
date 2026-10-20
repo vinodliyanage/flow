@@ -73,7 +73,7 @@ test('instruction grammar uses valid W3C-style EBNF and defines every referenced
   assert.deepEqual([...usedCategories].sort(), [...categories].sort());
   assert.deepEqual([...literals].sort(), [
     '=', 'AS', 'ASK', 'ASYNC', 'AWAIT', 'BREAK', 'COMMAND', 'CONTEXT', 'CONTINUE',
-    'DO', 'ELSE', 'IF', 'PRINT', 'REPEAT', 'RETURN', 'RUN', 'SET', 'TIMES', 'USE', 'WHILE'
+    'DO', 'ELSE', 'FUNCTION', 'IF', 'PRINT', 'REPEAT', 'RETURN', 'RUN', 'SET', 'TIMES', 'USE', 'WHILE'
   ].sort());
 });
 

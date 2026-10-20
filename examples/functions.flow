@@ -1,0 +1,21 @@
+FUNCTION add_one
+    SET result = @input + 1
+
+COMMAND ADD_TWO
+    add_one @input AS first
+    add_one @first AS second
+    SET result = @second
+
+FUNCTION add_three
+    ADD_TWO @input AS first
+    add_one @first AS second
+    SET result = @second
+
+add_one 4 AS next
+PRINT @next
+
+ADD_TWO @next AS total
+PRINT @total
+
+add_three @total AS final_total
+PRINT @final_total

@@ -82,6 +82,13 @@
             }
           },
           {
+            "name": "Flow: FUNCTION",
+            "scope": "keyword.control.flow.function",
+            "settings": {
+              "foreground": "#B392F0"
+            }
+          },
+          {
             "name": "Flow: ASK",
             "scope": "keyword.control.flow.ask",
             "settings": {

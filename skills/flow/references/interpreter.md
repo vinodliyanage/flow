@@ -11,7 +11,7 @@ Uppercase symbols are lexical categories defined below. Spaces and logical
 instruction endings are implicit; BLOCK/LITERAL include their layout boundaries.
 
 ```ebnf
-program     ::= (command | instruction)*
+program     ::= (command | function | instruction)*
 instruction ::= ask | set | context | do | print | branch | repeat | while | continue | break | use | run | async | await | return | call
 binding     ::= "AS" NAME
 ask         ::= "ASK" STRING binding
@@ -26,11 +26,12 @@ continue    ::= "CONTINUE"
 break       ::= "BREAK"
 use         ::= "USE" (MARKDOWN_PATH binding | FLOW_PATH)
 command     ::= "COMMAND" COMMAND_NAME BLOCK
+function    ::= "FUNCTION" NAME BLOCK
 run         ::= "RUN" ARGV LITERAL? binding?
 async       ::= "ASYNC" NAME BLOCK
 await       ::= "AWAIT" NAME
 return      ::= "RETURN" STRING?
-call        ::= COMMAND_NAME EXPRESSION? binding?
+call        ::= (COMMAND_NAME | NAME) EXPRESSION? binding?
 ```
 
 | Category | Meaning |
@@ -65,7 +66,7 @@ Unlisted results are absent, not NULL.
 | WHILE | Retest before every iteration, including the first; share bindings. |
 | CONTINUE / BREAK | Skip the local iteration / exit the nearest local loop. Fail outside a loop; never control a caller's loop. |
 | USE | Read only when reached. Markdown returns text; Flow runs synchronously with shared bindings/registrations, then resumes. |
-| COMMAND | Register its body when reached, without executing it; rules below. No result. |
+| COMMAND / FUNCTION | Register its body when reached, without executing it; rules below. No result. |
 | RUN | Launch directly in host working directory; optional literal stdin; await exit, default timeout 30 seconds. Result: stdout/stderr strings and integer exit_code. Missing executable, timeout, or nonzero exit fails; retain available diagnostics. Its optional AS is aligned on a following line, even without stdin. |
 | ASYNC | Invocation top level, outside branches/loops/tasks. Launch real background work with isolated binding/registration snapshots; advance after launch. Unique task name cannot collide with bindings. No simulated concurrency. |
 | AWAIT | Join a known task successfully; expose its bindings as @task.field. Repeated joins reuse results. |
@@ -78,8 +79,8 @@ Read the complete selected file or Markdown Flow block; clarify ambiguous
 selection/base. Preflight structure/names before effects: names must be registered,
 declared locally, or deferred to imports. Definition bodies receive
 structural validation only. Resolve runtime data/registrations when reached;
-imports remain unread until USE. Dispatch only registered commands, exactly once
-per reached instruction, advancing after actual completion. No skipping,
+imports remain unread until USE. Dispatch only known built-ins/registered callables,
+exactly once per reached instruction, advancing after actual completion. No skipping,
 combining, reordering, anticipation, retries, repairs, rollback, or invented work.
 Pending questions/processes/tasks are not completion. Preserve state across waits;
 never repeat a question or task to resume it. Stop if state is lost.
@@ -91,8 +92,9 @@ resume, source-location, or completion narration. Wait silently after ASK;
 message-free RETURN and file end are silent. Higher-priority host requirements
 still apply.
 
-Use uppercase commands, four-space structural indentation, no tabs, trailing
-colons, closing keywords, or semicolon separators. Blank lines do nothing.
+Use uppercase commands and lowercase function calls; four-space structural
+indentation, no tabs, trailing colons, closing keywords, or semicolon separators.
+Blank lines do nothing.
 Full-line # comments and paired ### comment blocks do not execute. Parse literal
 bodies and strings before structural text; their comments/commands remain data.
 DO's optional AS belongs at the end of its complete prose. Bind only after
@@ -113,13 +115,19 @@ exact input fails without prose fallback. Resolve everything before output:
 strings unchanged, others JSON, parts joined by one space. Other nonempty input
 is prose; only prose accepts once-indented continuations joined with spaces.
 
-Definitions use plain COMMAND NAME, only at file/selected-block top level.
-Allow several definitions alongside ordinary instructions. Reject empty/nested
-bodies, duplicate/built-in names, and direct/indirect recursion. Calls require
-registration when reached. Discard invocation locals/registrations on return;
+Definitions use COMMAND with an uppercase name or FUNCTION with a lowercase
+label, only at file/selected-block top level. Allow several definitions alongside
+ordinary instructions. Reject empty/nested bodies, duplicate/built-in names, and
+direct/indirect recursion. Calls require registration when reached.
+Discard invocation locals/registrations on return;
 relative paths use the defining file. Normal body end preserves its final direct
 instruction's result; explicit RETURN supplies none. A bound call ending without
 a result fails without reusing earlier output. Unbound calls discard results.
+Both callable kinds share these input/scope/result rules and may call each other.
+Function labels are separate from bindings/task labels: bare names call functions,
+@name reads data, and AWAIT name joins tasks. Calls are standalone instructions,
+not expressions. ASYNC name still launches its indented body immediately; it
+does not define a reusable function or accept an ASYNC FUNCTION header.
 AS COMMAND footers are replaced: report an error suggesting COMMAND NAME with
 an indented body; never register or migrate the old form while running.
 

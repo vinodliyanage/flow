@@ -1,4 +1,4 @@
-COMMAND SCORE_PRIORITY
+FUNCTION score_priority
     IF @input is exactly "high"
         SET score = 3
     ELSE
@@ -22,7 +22,7 @@ COMMAND READ_TASK
     WHILE @priority is not exactly one of "high", "medium", or "low"
         ASK "Please enter exactly high, medium, or low in lowercase." AS priority
 
-    SCORE_PRIORITY @priority AS score
+    score_priority @priority AS score
     DO Return an object with fields title from @title, minutes from @minutes,
         priority from @priority, and score from @score.
 
