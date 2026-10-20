@@ -1,0 +1,9 @@
+Use the experimental Flow skill at:
+/Users/vinodliyanage/Developer/Personal/flow/skills/flow/SKILL.md
+
+Read that skill and its complete current interpreter, then execute:
+/Users/vinodliyanage/Developer/Personal/flow/examples/functions-quiz.flow
+
+Interpret the Flow directly as an agent. Wait for my actual reply at each ASK
+and follow the interpreter's output rules. Report any failure with the original
+file and line number.

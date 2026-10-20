@@ -1,0 +1,51 @@
+FUNCTION get_question
+    IF @input is exactly 1
+        SET question = {"prompt": "How many minutes are in an hour? a) 30 b) 60 c) 90", "answer": "b"}
+    ELSE
+        IF @input is exactly 2
+            SET question = {"prompt": "Which number is even? a) 7 b) 9 c) 12", "answer": "c"}
+        ELSE
+            SET question = {"prompt": "How many sides does a triangle have? a) 3 b) 4 c) 5", "answer": "a"}
+    SET result = @question
+
+FUNCTION score_answer
+    IF @input.given is exactly @input.expected
+        SET points = 1
+    ELSE
+        SET points = 0
+    SET result = @points
+
+COMMAND ASK_QUESTION
+    PRINT @input.prompt
+    ASK "Your answer? Enter a, b, or c." AS answer
+    WHILE @answer is not exactly one of "a", "b", or "c"
+        ASK "Please enter exactly a, b, or c in lowercase." AS answer
+
+    DO Return an object with fields given from @answer and expected from @input.answer. AS response
+    score_answer @response AS points
+
+    IF @points is exactly 1
+        PRINT "Correct!"
+    ELSE
+        PRINT "The correct answer is:" @input.answer
+    SET result = @points
+
+PRINT "Quick quiz: three questions, one point for each correct answer."
+SET score = 0
+SET question_number = 1
+
+REPEAT 3 TIMES
+    PRINT "Question" @question_number "of 3"
+    get_question @question_number AS question
+    ASK_QUESTION @question AS points
+    SET score = @score + @points
+    SET question_number = @question_number + 1
+
+PRINT "Final score:" @score "out of 3"
+IF @score is exactly 3
+    PRINT "Perfect score!"
+ELSE
+    IF @score is greater than 0
+        PRINT "Good effort. Try again to improve your score."
+    ELSE
+        PRINT "Keep practising. You can try the quiz again."
