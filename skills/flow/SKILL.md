@@ -3,7 +3,7 @@ name: flow
 description: Author, review, validate, or execute Flow; convert prompts; set up Flow in Cursor or VS Code.
 metadata:
   author: "Vinod Liyanage"
-  version: "0.3.0-experiment.2"
+  version: "0.3.0"
 ---
 
 # Flow

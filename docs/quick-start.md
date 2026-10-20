@@ -108,4 +108,5 @@ to turn one of your own procedures into a program. The
 Reading, creating, or opening a program does not start it. Execution begins
 when you explicitly ask the agent to run it. If execution stops with an error,
 use the reported file and instruction to understand where it stopped; the
-agent must not silently retry or replay work.
+agent must not silently retry or replay work. Errors include the original file
+and line number. Normal execution adds no pause or completion narration.

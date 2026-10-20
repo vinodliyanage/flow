@@ -15,6 +15,8 @@ use ordinary English conditions so you can read the procedure directly.
 | [Investigate and fix a bug](#investigate-and-fix-a-bug) | A supported proposal, approved fix, and check results. | Evidence before a proposal; approval before edits. |
 | [Meeting follow-up](#meeting-follow-up) | Decisions and action items ready to share. | Missing owners and deadlines trigger a question. |
 | [Customer reply](#customer-reply) | A reply grounded in supplied policy. | Unsupported decisions go back to a human. |
+| [Interactive quiz](#interactive-quiz) | A score from three answers. | Functions, commands, validation loops, and result bindings. |
+| [Task planner](#task-planner) | Three tasks ordered by priority and duration. | Reusable helpers and a total time estimate. |
 
 Each listing is included from its `.flow` file. The explanations describe its
 intended paths; they are not records of executed runs. To run one, load the
@@ -84,6 +86,26 @@ customer's message and the policy or product information the answer may use.
 A decision outside the supplied policy returns to a human. Otherwise, the
 agent drafts a reply grounded in that information. It does not send the reply,
 issue refunds, or make changes to a customer account.
+
+## Interactive quiz
+
+This example uses lowercase functions to select questions and score answers.
+An uppercase command asks each question, validates the reply, and supplies the
+points to the main loop. It needs no external service.
+
+<<< ../examples/functions-quiz.flow{flow}
+
+Enter an invalid choice to check that the current question asks again. In a
+fresh run, answers `b`, `c`, and `a` should produce `Final score: 3 out of 3`.
+These are expected outcomes, not an executed transcript.
+
+## Task planner
+
+Collect three task names, estimates, and priorities. The function scores a
+priority; the command gathers and validates a task. The final plan sorts higher
+priority first and shorter duration second, preserving entry order for ties.
+
+<<< ../examples/task-planner.flow{flow}
 
 ## Write your own workflow
 

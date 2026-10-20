@@ -1,7 +1,7 @@
-# Flow interpreter — EBNF experiment
+# Flow interpreter
 
-Agent-interpreted contract. Apply the grammar, behavior table, and shared rules
-together. The grammar describes instruction forms; it is not a native runtime.
+Agent-interpreted contract for Flow 0.3.0. Apply the grammar, behavior table, and
+shared rules together. The grammar describes instruction forms; it is not a native runtime.
 
 ## Grammar
 

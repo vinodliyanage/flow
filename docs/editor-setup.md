@@ -22,7 +22,7 @@ Use the Flow skill to set up syntax highlighting and USE navigation in Cursor.
 Replace Cursor with VS Code if appropriate. The skill's setup guide locates
 the bundled VSIX, checks the editor, installs it, and verifies registration.
 
-For manual installation, locate `assets/flow-0.2.8.vsix` inside the installed
+For manual installation, locate `assets/flow-0.3.0.vsix` inside the installed
 Flow skill. In your editor, open the Command Palette, run
 **Extensions: Install from VSIX...**, and select that file. Reload the window
 if already-open files have not refreshed.
@@ -31,16 +31,16 @@ With the appropriate editor CLI available, you can also pass the installed
 package's absolute path:
 
 ```sh
-cursor --install-extension /absolute/path/to/installed/flow/assets/flow-0.2.8.vsix
+cursor --install-extension /absolute/path/to/installed/flow/assets/flow-0.3.0.vsix
 ```
 
 ```sh
-code --install-extension /absolute/path/to/installed/flow/assets/flow-0.2.8.vsix
+code --install-extension /absolute/path/to/installed/flow/assets/flow-0.3.0.vsix
 ```
 
 These are installation instructions, not commands executed by this guide.
 The extension identifier is `vinodliyanage.flow`; this bundle's version is
-`0.2.8`. Its version describes the editor package, not a language version.
+`0.3.0`. Its version describes the editor package, not a language version.
 
 ## Check authoring support
 
@@ -55,11 +55,11 @@ it does not execute it. Colors may differ when your theme overrides token styles
 ## Typing assistance
 
 In a `.flow` file, indentation defaults to four spaces. Block rules
-indent after headers such as `IF`, `ELSE`, and `REPEAT`. User and workspace
+indent after headers such as `IF`, `ELSE`, `REPEAT`, `COMMAND`, and `FUNCTION`. User and workspace
 settings can override these defaults; the extension does not edit settings files.
 
-Type `ASK`, `DO`, `PRINT`, `IF`, or `CONTEXT` and use **Trigger Suggest** to select
-a command template. You can also use **Insert Snippet** from the Command Palette.
+Type `ASK`, `DO`, `PRINT`, `IF`, `CONTEXT`, `COMMAND`, or `FUNCTION` and use
+**Trigger Suggest** to select a command template. You can also use **Insert Snippet** from the Command Palette.
 Press Tab to move through the template's editable fields.
 
 `PRINT` offers exact-value and prose templates. `IF` offers a single branch or

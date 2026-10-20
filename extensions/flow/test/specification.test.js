@@ -85,7 +85,7 @@ test('notation checker rejects empty alternatives, malformed groups and unsuppor
   assert.deepEqual([...parseExpression('(name | "value")?').literals], ['value']);
 });
 
-test('experiment keeps COMMAND declarations plain and replaces the footer form', () => {
+test('COMMAND declarations stay plain and replace the footer form', () => {
   const grammar = specification.match(/```ebnf\n([\s\S]*?)\n```/)[1];
   assert.match(grammar, /^command +::= "COMMAND" COMMAND_NAME BLOCK$/m);
   assert.ok(!grammar.includes('"AS" "COMMAND"'));
@@ -98,4 +98,11 @@ test('experiment keeps COMMAND declarations plain and replaces the footer form',
   for (const line of example.split('\n').filter(line => /^ *(IF|WHILE)\b/.test(line))) {
     assert.ok(!/==|!=/.test(line), line);
   }
+});
+
+test('the public instruction grammar matches the agent interpreter contract', () => {
+  const published = fs.readFileSync(path.join(__dirname,
+    '../../../docs/specification.md'), 'utf8');
+  const grammar = source => source.match(/```ebnf\n([\s\S]*?)\n```/)[1];
+  assert.equal(grammar(published), grammar(specification));
 });

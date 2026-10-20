@@ -1,4 +1,4 @@
-Use the experimental Flow skill at:
+Use the Flow skill at:
 /Users/vinodliyanage/Developer/Personal/flow/skills/flow/SKILL.md
 
 Read that skill and its complete current interpreter, then execute:

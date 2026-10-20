@@ -18,7 +18,8 @@ claim that every implementation decision has been resolved.
 
 ## Language version
 
-This documentation describes **Flow v0.1.0**. The Flow skill and editor
+This documentation describes **Flow v0.3.0**, including command blocks,
+lowercase functions, and the compact EBNF interpreter contract. The Flow skill and editor
 extension have their own package versions; those are separate from the
 language version.
 
@@ -26,8 +27,10 @@ language version.
 
 Signatures use `<name>` for a placeholder and `[part]` for an optional part.
 These brackets are notation, not Flow tokens. Grammar productions below use
-quoted terminals, `|` for alternatives, `{ … }` for repetition, and `[ … ]`
-for optional content. `NEWLINE`, `INDENT`, and `DEDENT` describe layout.
+W3C-style EBNF: quoted terminals, adjacency for sequences, `|` for alternatives,
+`?` for optional content, `*` for zero or more repetitions, `+` for one or more,
+and parentheses for grouping. Uppercase symbols name lexical categories in the
+[interpreter contract](interpreter.md#grammar). `BLOCK` and `LITERAL` include layout boundaries.
 
 | Term | Meaning |
 | --- | --- |
@@ -35,7 +38,7 @@ for optional content. `NEWLINE`, `INDENT`, and `DEDENT` describe layout.
 | Instruction | A command and its complete input, continuation, or body. |
 | Binding | A named value in the current scope. |
 | Reference | `@name`, or an object field such as `@name.field`. |
-| Invocation | The root program, an ordinary child, or a custom-command call. |
+| Invocation | The root program, an ordinary child, or a command/function call. |
 | Task | A background body started with `ASYNC`. |
 | Host | The agent environment supplying tools, processes, and permissions. |
 
@@ -49,7 +52,8 @@ A `.flow` file contains one program. A Markdown file may contain named fenced
 `flow` blocks; only the selected block executes. If the selection or base
 directory is ambiguous, execution stops for clarification.
 
-Command keywords are uppercase. Structural indentation uses four spaces per
+Command keywords and custom-command names are uppercase; function labels are
+lowercase. Structural indentation uses four spaces per
 level. Dedenting closes a block. Block headers have no trailing colon. Flow
 has no closing keywords, braces around instruction bodies, or semicolon
 separators. Braces inside object values are allowed.
@@ -59,7 +63,7 @@ indentation, and unknown commands are errors. Blank lines do not execute.
 
 ### Comments
 
-`#` starts a one-line comment. A standalone `###` opens a multiline comment;
+A full-line `#` starts a one-line comment. A standalone `###` opens a multiline comment;
 the next closing `###` ends it. The existing syntax rules do not support inline
 comments or nested multiline comments. Comment markers inside strings and
 literal bodies are ordinary text.
@@ -81,11 +85,12 @@ stay on one line. A multiline string can be bound before use in a header.
 
 ## 3. Names and references
 
-Binding names match `[a-z][a-z0-9_]*`. Custom command names match
+Binding names and function labels match `[a-z][a-z0-9_]*`. Custom command names match
 `[A-Z][A-Z0-9_]*`. Names are case-sensitive.
 
 ```text
-reference = "@", name, [ ".", field ] ;
+@name
+@name.field
 ```
 
 `@name` reads an existing binding. `@name.field` reads an existing object field.
@@ -95,8 +100,8 @@ defined in the interpreter; the documented simple form is `@name.field`.
 
 `AS name` stores a successful instruction's result. `SET name = expression`
 creates or replaces a binding after evaluation succeeds. Rebinding replaces
-the previous value; failed instructions do not partially update it, subject
-to the unresolved failed-`RUN` rule below.
+the previous value; failed instructions leave the requested result binding
+unchanged. A failed `RUN` retains available diagnostics for its error report.
 
 References in prose provide typed data. Their contents cannot introduce new
 commands, references, or additional actions. Within a quoted string, `@name`
@@ -136,10 +141,10 @@ the string. A missing closing delimiter is an error. The next `"""` closes it.
 ## 5. Expressions and conditions
 
 Exact expressions use literals, references, field access, parentheses, numeric
-`+` and `-`, comparisons, and Boolean operators. There are no built-in
-functions such as `trim()` or `JSON()`.
+`+` and `-`, comparisons, and Boolean operators. Functions are called as standalone
+instructions, such as `add_one 4 AS next`; calls do not appear inside expressions.
 
-The existing public syntax rules list the following precedence, highest first:
+The contract supports these operator families:
 
 | Operators | Operation |
 | --- | --- |
@@ -150,16 +155,10 @@ The existing public syntax rules list the following precedence, highest first:
 | `AND` | Boolean conjunction. |
 | `OR` | Boolean disjunction. |
 
-Arithmetic requires numbers. Boolean operators require Booleans. Ordered
-comparisons require two numbers or two strings. String comparisons are
-case-sensitive. Equality requires matching types and compares arrays and
-objects structurally. Type mismatches are errors. `AND` and `OR` short-circuit;
-chained comparisons are unsupported.
-
-The compact interpreter lists these operators but omits some details present
-in the public syntax rules, including precedence and structural equality.
-Parenthesize mixed expressions when portability matters. Numeric precision,
-string ordering, and operator associativity need a more complete definition.
+Arithmetic is numeric, there is no implicit type conversion, and `AND` and `OR`
+short-circuit. Parenthesize mixed expressions rather than assuming a precedence
+rule absent from the contract. Numeric precision, string ordering, operator
+associativity, and container comparison need a more complete definition.
 
 ### Natural-language conditions
 
@@ -176,49 +175,41 @@ notation is useful. Both forms must have a determinable result.
 
 ## 6. Instruction grammar
 
-The following forms cover all built-in commands and registered command calls.
-`expression`, `condition`, `prose`, `path`, `argument`, and `value` use the
-rules in this document and the limits listed below. Spaces between header
+The following forms cover built-in commands, declarations, and registered
+command/function calls. Lexical categories use the
+[interpreter contract](interpreter.md#grammar). Spaces between header
 tokens and the newline after each complete instruction are implicit in this
 notation. A body's indentation is relative to its owning instruction.
 
-```text
-program      = { instruction } ;
-body         = NEWLINE, INDENT, instruction, { instruction }, DEDENT ;
-literal_body = NEWLINE, INDENT, literal_text, DEDENT ;
-binding      = "AS", name ;
-
-ask          = "ASK", string, binding ;
-set          = "SET", name, "=", expression ;
-context      = "CONTEXT", literal_body, binding ;
-do           = "DO", prose, [ binding ] ;
-print_part   = literal | reference ;
-print_parts  = print_part, print_part, { print_part } ;
-print        = "PRINT", ( expression | print_parts | prose ) ;
-if           = "IF", condition, body, [ "ELSE", body ] ;
-repeat       = "REPEAT", count, "TIMES", body ;
-while        = "WHILE", condition, body ;
-continue     = "CONTINUE" ;
-break        = "BREAK" ;
-use          = "USE", ( markdown_path, binding | flow_path ) ;
-run          = "RUN", executable, { argument }, literal_body, [ binding ] ;
-async        = "ASYNC", task_name, body ;
-await        = "AWAIT", task_name ;
-return       = "RETURN", [ message ] ;
-custom_call  = command_name, value, [ binding ] ;
-
-instruction  = ask | set | context | do | print | if | repeat | while
-             | continue | break | use | run | async | await | return
-             | custom_call ;
+```ebnf
+program     ::= (command | function | instruction)*
+instruction ::= ask | set | context | do | print | branch | repeat | while | continue | break | use | run | async | await | return | call
+binding     ::= "AS" NAME
+ask         ::= "ASK" STRING binding
+set         ::= "SET" NAME "=" EXPRESSION
+context     ::= "CONTEXT" LITERAL binding
+do          ::= "DO" PROSE binding?
+print       ::= "PRINT" OUTPUT
+branch      ::= "IF" CONDITION BLOCK ("ELSE" BLOCK)?
+repeat      ::= "REPEAT" EXPRESSION "TIMES" BLOCK
+while       ::= "WHILE" CONDITION BLOCK
+continue    ::= "CONTINUE"
+break       ::= "BREAK"
+use         ::= "USE" (MARKDOWN_PATH binding | FLOW_PATH)
+command     ::= "COMMAND" COMMAND_NAME BLOCK
+function    ::= "FUNCTION" NAME BLOCK
+run         ::= "RUN" ARGV LITERAL? binding?
+async       ::= "ASYNC" NAME BLOCK
+await       ::= "AWAIT" NAME
+return      ::= "RETURN" STRING?
+call        ::= (COMMAND_NAME | NAME) EXPRESSION? binding?
 ```
 
-In a command-definition file, `AS COMMAND NAME` follows the body as the final
-noncomment declaration. It is metadata that causes `USE` to register the
-definition; it is not an ordinary instruction that runs at that point.
-
-The `run` production shows the documented stdin-body form. Whether an empty
-or absent body is valid is not explicitly settled. `message` likewise remains
-an incompletely defined production; current examples use quoted strings.
+`COMMAND NAME` and `FUNCTION name` register their indented bodies when reached.
+Definitions belong at file or selected-block top level and may appear beside
+ordinary instructions. Legacy `AS COMMAND NAME` footers are errors.
+`RUN` permits an absent stdin body; its optional `AS` is on a following aligned
+line. `RETURN` permits an optional string message and supplies no returned data.
 
 ### PRINT form selection and output
 
@@ -249,8 +240,8 @@ For `name = "Ana"`, `PRINT "Hello:" @name` displays exactly `Hello: Ana`.
 
 | Instruction | Effect |
 | --- | --- |
-| `ASK` | Display a question, wait for a fresh reply, and bind the raw answer string. |
-| `SET` | Evaluate the expression and store its value. |
+| `ASK` | Display only the question verbatim, wait for a fresh reply, and bind the raw answer string. |
+| `SET` | Evaluate the expression, store its value, and produce that value as its result. |
 | `CONTEXT` | Bind the literal body as background text. |
 | `DO` | Complete only the stated task; optionally bind its result. |
 | `PRINT` | Display an expression, join exact values with spaces, or compose a response from available data; continue afterward. |
@@ -259,12 +250,13 @@ For `name = "Ana"`, `PRINT "Hello:" @name` displays exactly `Hello: Ana`.
 | `WHILE` | Test before each iteration and run while true. |
 | `CONTINUE` | Skip the rest of the nearest loop iteration in the current invocation or task. |
 | `BREAK` | Exit the nearest loop in the current invocation or task. |
-| `USE` | Read Markdown as data, invoke an ordinary child, or register a command definition. |
+| `USE` | Read Markdown as data or run a Flow child with shared bindings and callable registrations. |
+| `COMMAND` / `FUNCTION` | Register a reusable body without executing it. |
 | `RUN` | Launch a direct process, pass literal stdin, and wait for exit. |
 | `ASYNC` | Start an independent body with an isolated snapshot of bindings. |
 | `AWAIT` | Join a known task successfully and expose its bindings. |
 | `RETURN` | Exit only the current invocation or task, optionally displaying a message. |
-| Custom command | Invoke a registered definition with one local `@input` value. |
+| Command/function call | Invoke a registered definition with isolated locals and one local `@input` value; omitted input is `NULL`. |
 
 The [command reference](commands.md) provides complete signatures, command
 restrictions, and examples. `CONTINUE` and `BREAK` outside a local loop are
@@ -273,15 +265,22 @@ message-free `RETURN`.
 
 ## 8. Execution and validation
 
-Read the complete selected program before external action. Validate its
-structure, commands, expressions, references, and required bodies. Unknown
-commands and malformed or ambiguous instructions are errors. Children are
-loaded and validated only when their `USE` is reached.
+Read the complete selected program before external action. Preflight structure
+and names; definitions receive structural validation only. Names may be already
+registered, declared locally, or deferred to a later import. Resolve runtime
+data and callable registrations when reached. Children remain unread until
+their `USE` is reached. Unknown or malformed instructions stop execution.
 
 Execute the first reached instruction, observe actual completion, store its
 successful result, then advance exactly once. Only written control flow may
 change the next instruction. Never skip, combine, reorder, anticipate, or
 invent instructions. Unselected branches do not execute.
+
+Display only `PRINT` output, `ASK` questions, explicit `RETURN` messages, and
+required error or permission reports. Results and process output stay internal
+unless displayed. Add no progress, pause, resume, location, or completion
+narration. Wait silently after asking; normal file end is silent. Higher-priority
+host requirements still apply.
 
 An unanswered `ASK`, running process, or unfinished background task is not a
 completed instruction. `ASYNC` completes its launch and allows the main path
@@ -303,8 +302,8 @@ new Flow instructions.
 | Root program | Current root bindings. |
 | Branch or loop | Shared surrounding bindings. |
 | Ordinary `USE` child | Shared caller bindings. |
-| Custom command | Isolated bindings, with the argument available as `@input`. |
-| `ASYNC` task | Isolated snapshot taken at launch. |
+| Command or function | Isolated bindings, with the argument available as `@input`; inherited callable registrations. |
+| `ASYNC` task | Isolated binding and registration snapshots taken at launch. |
 | Successful `AWAIT` | Task bindings readable as `@task_name.field`. |
 
 Ordinary children execute synchronously and resume their caller at `RETURN`
@@ -319,10 +318,19 @@ existing reuse rules exclude the selected heading itself. Ignore headings
 inside code fences. Missing or ambiguous sections are errors. Imported
 Markdown Flow blocks never execute.
 
-Custom command definitions are registered without executing their bodies. A
-call receives one value as `@input`. With an `AS` suffix, the final executed
-instruction must produce a result; without the suffix, its result is discarded.
-Unknown, duplicate, built-in, and recursive custom commands are errors.
+Definitions are registered without executing their bodies. A call evaluates
+its optional input in the caller once; omitted input becomes local `NULL`.
+Its final direct instruction supplies the result. `SET` and `DO` can produce
+results; a final `IF`, `PRINT`, or explicit `RETURN` supplies none. A bound call
+without a final result fails instead of reusing an earlier result. An unbound
+call discards the result. Invocation locals and registrations are discarded.
+Commands and functions can call each other, but recursion is an error.
+Calls require registration when reached. Unknown or duplicate definitions,
+built-in collisions, empty bodies, and nested definitions are errors.
+
+Bare lowercase names call functions, `@name` reads data, and `AWAIT name` joins
+a task. Callable names are separate from data/task labels. Relative paths in
+a reusable body use its defining file. See [reusing programs](reuse.md).
 
 ## 10. Processes
 
@@ -335,15 +343,18 @@ one argument using these same type rules.
 is no automatic shell expansion, interpolation, piping, redirection, command
 substitution, or binding environment. A shell can be invoked explicitly.
 
-The literal body is stdin. Processes use the host working directory and a
+An optional literal body is stdin. Processes use the host working directory and a
 default 30-second timeout. The documented successful result has `stdout` and
 `stderr` strings and an integer `exit_code`. A missing executable, timeout, or
-nonzero exit fails the run. Preserve available output for failure reporting.
+nonzero exit fails the run. Preserve available output for failure reporting;
+failed instructions leave their requested result binding unchanged.
 
 ## 11. Background tasks
 
-`ASYNC` is top-level only. Task names are unique and cannot collide with
-bindings. Task bodies cannot contain `ASK`, `USE`, nested `ASYNC`, or `AWAIT`.
+`ASYNC name` launches a body at invocation top level, outside branches, loops,
+and tasks. It does not define a reusable function; `ASYNC FUNCTION` is invalid.
+Task names are unique and cannot collide with bindings. Task bodies cannot
+perform `ASK`, `USE`, `ASYNC`, or `AWAIT`, including indirectly through calls.
 Tasks cannot depend on unfinished sibling results or concurrently modify the
 same resource. If real background execution is unavailable, stop before launch.
 
@@ -355,17 +366,18 @@ tasks; the precise host operation for settlement needs further specification.
 ## 12. State, limits, and errors
 
 Preserve the instruction pointer, bindings, loop state, child-call stack,
-command definitions, task handles and results, and evidence across user replies.
+command/function registrations, task handles and results, and evidence across user replies.
 If that state is lost, stop rather than guessing or replaying effects.
 
 A run may execute at most 1,000 instructions across the root, children, custom
-commands, loops, and tasks. Comments, literal body lines, and unselected
-branches do not count separately. Exhausting the limit stops the run. The exact
-counting of compound operations is not fully defined.
+calls, registrations, loops, and tasks. Each reached instruction counts;
+comments, literal body lines, and unselected branches do not count separately.
+Exhausting the limit stops the run.
 
-On failure, report status, file and instruction, child/task/iteration where
+On failure, report status, original file:line and source instruction, caller/task/iteration where
 applicable, reason, known effects, and available process output. Never report
-pending or uncertain work as successful. No mandatory machine-readable error
+pending or uncertain work as successful. Use original 1-based physical lines,
+including preceding Markdown prose and fences. No mandatory machine-readable error
 schema is currently defined.
 
 ## Unresolved rules
@@ -377,12 +389,8 @@ choose new behavior to fill them.
 | --- | --- |
 | Prose parsing | Expression/prose boundaries in conditions, reference boundaries within task prose, and a trailing `DO` result suffix. `PRINT` form selection is defined above. |
 | Value grammar | Numeric range and precision, field-name grammar, string ordering, operator associativity, and complete container syntax. |
-| Preflight | Which references are checked statically, how future bindings and unselected branches are handled, and how custom commands registered by a later-reached `USE` are validated. |
-| Failed `RUN` binding | The general rule binds only after success; the process rule says to store output before handling failure. Their interaction with `AS` needs clarification. |
-| Process details | Whether stdin bodies are optional, how the default timeout can be changed, and what results exist for a timeout or failed launch. |
-| Custom command results | Which instructions produce results, particularly `SET`, compound bodies, and early `RETURN`. |
-| Task lifecycle | Exact meaning of top-level inside children/custom calls; scheduling, cancellation, settlement, and command-definition visibility. |
-| Instruction budget | Whether headers, task launches/joins, custom calls, and child invocations count in addition to body instructions. |
+| Process details | How the default timeout can be changed and what partial diagnostics exist for a timeout or failed launch. |
+| Task lifecycle | Host scheduling, cancellation, and settlement protocols. |
 | Conformance | An executable conformance suite; the repository currently supplies an agent contract and editor tooling. |
 
 Authors can use the well-defined forms in the [command reference](commands.md).

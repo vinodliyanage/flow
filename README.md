@@ -61,6 +61,26 @@ Agents interpret programs using the Flow skill in `skills/flow/` and its
 complete interpreter contract. This repository does not provide a standalone
 runtime; natural-language task results still depend on agent judgment.
 
+Flow **0.3.0** defines reusable uppercase commands and lowercase functions:
+
+```flow
+FUNCTION add_one
+    SET result = @input + 1
+
+COMMAND ADD_TWO
+    add_one @input AS first
+    add_one @first AS second
+    SET result = @second
+
+ADD_TWO 3 AS total
+PRINT @total
+```
+
+Both forms receive isolated local `@input` and can expose their final direct
+instruction's result with `AS`. `ASYNC name` retains its existing task-body
+syntax. See [reusing programs](docs/reuse.md) and the
+[interactive quiz](examples/functions-quiz.flow).
+
 Conditions can be ordinary English, such as `IF @review identifies blocking
 issues`. Prefer clear sentences when they express the decision naturally;
 exact expressions are available when needed. See the
