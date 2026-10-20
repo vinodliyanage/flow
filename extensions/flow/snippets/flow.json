@@ -48,5 +48,14 @@
       "$0"
     ],
     "description": "Store literal background text in an aligned AS binding."
+  },
+  "COMMAND definition": {
+    "prefix": "COMMAND",
+    "body": [
+      "COMMAND ${1:NAME}",
+      "    DO ${2:Describe the task for @input and return its result.}",
+      "$0"
+    ],
+    "description": "Group instructions in a plain command block with isolated @input."
   }
 }

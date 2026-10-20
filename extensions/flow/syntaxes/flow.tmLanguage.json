@@ -106,15 +106,12 @@
       }
     },
     {
-      "match": "^ *(AS) +(COMMAND) +([A-Z][A-Z0-9_]*) *$",
+      "match": "^ *(COMMAND) +([A-Z][A-Z0-9_]*) *$",
       "captures": {
         "1": {
-          "name": "keyword.other.flow"
+          "name": "keyword.control.flow.command"
         },
         "2": {
-          "name": "storage.type.function.flow"
-        },
-        "3": {
           "name": "entity.name.function.flow"
         }
       }

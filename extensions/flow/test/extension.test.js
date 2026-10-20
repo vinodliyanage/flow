@@ -61,7 +61,7 @@ test('all current commands have their own scope; legacy syntax has no builtin sc
     PRINT: 'PRINT @result', CONTEXT: 'CONTEXT', USE: 'USE common.flow', IF: 'IF TRUE',
     ELSE: 'ELSE', REPEAT: 'REPEAT 0 TIMES', WHILE: 'WHILE FALSE', CONTINUE: 'CONTINUE',
     BREAK: 'BREAK', RETURN: 'RETURN "Done"', RUN: 'RUN python3 - @name',
-    ASYNC: 'ASYNC frontend', AWAIT: 'AWAIT frontend'
+    ASYNC: 'ASYNC frontend', AWAIT: 'AWAIT frontend', COMMAND: 'COMMAND GREET'
   };
   for (const [command, source] of Object.entries(cases)) {
     assert.ok(hasScope(tokenize(flow, source)[0], 'keyword.control.flow.' + command.toLowerCase()), command);
@@ -82,7 +82,9 @@ test('references, bindings, custom commands, JSON strings and Boolean operators 
   const operator = tokenize(flow, 'IF NOT @approved OR (@total >= 1 AND TRUE)')[0];
   assert.ok(hasScope(operator, 'keyword.operator.flow'));
   assert.ok(hasScope(operator, 'constant.language.flow.true'));
-  assert.ok(hasScope(tokenize(flow, 'AS COMMAND TRIM')[0], 'entity.name.function.flow'));
+  const legacy = 'AS COMMAND TRIM';
+  assert.ok(!scopes(tokenize(flow, legacy)[0], legacy.lastIndexOf('TRIM'))
+    .includes('entity.name.function.flow'));
   assert.ok(hasScope(tokenize(flow, 'TRIM @name AS name')[0], 'entity.name.function.flow'));
   assert.ok(!hasScope(tokenize(flow, 'SET x = trim("x")')[0], 'support.function.flow'));
 });
@@ -95,6 +97,7 @@ test('labels, references, commands, and quoted strings have explicit default col
   assert.equal(colorFor('variable.other.flow'), '#9CDCFE');
   assert.equal(colorFor('variable.other.reference.flow'), '#9CDCFE');
   assert.equal(colorFor('entity.name.function.flow'), '#DCDCAA');
+  assert.equal(colorFor('keyword.control.flow.command'), '#B392F0');
   assert.equal(colorFor('string.quoted.double.flow'), '#98C379');
   assert.equal(colorFor('string.quoted.triple.flow'), '#98C379');
   assert.equal(colorFor('meta.literal.block.flow'), undefined);
@@ -188,7 +191,7 @@ test('colon-free block headers indent, ELSE/AS dedent, REPEAT remains pink', () 
   const config = read('language-configuration.json');
   const increase = new RegExp(config.indentationRules.increaseIndentPattern);
   const decrease = new RegExp(config.indentationRules.decreaseIndentPattern);
-  for (const header of ['IF TRUE', 'ELSE', 'REPEAT 0 TIMES', 'WHILE @count < 3', 'ASYNC task', 'CONTEXT', 'RUN python3']) {
+  for (const header of ['IF TRUE', 'ELSE', 'REPEAT 0 TIMES', 'WHILE @count < 3', 'ASYNC task', 'CONTEXT', 'RUN python3', 'COMMAND GREET']) {
     assert.ok(increase.test(header), header);
   }
   assert.ok(!increase.test('IF TRUE:'));
@@ -220,21 +223,22 @@ test('Enter explicitly indents block headers at any nesting level', () => {
   }]);
   const header = new RegExp(config.onEnterRules[0].beforeText);
   for (const indent of ['', '    ', '        ']) {
-    for (const command of ['IF TRUE', 'ELSE', 'REPEAT 3 TIMES', 'WHILE FALSE', 'ASYNC task', 'CONTEXT', 'RUN sh']) {
+    for (const command of ['IF TRUE', 'ELSE', 'REPEAT 3 TIMES', 'WHILE FALSE', 'ASYNC task', 'CONTEXT', 'RUN sh', 'COMMAND GREET']) {
       assert.ok(header.test(indent + command), indent + command);
     }
   }
   for (const line of ['ASK "Name?" AS name', 'DO Review @name. AS result',
-    'PRINT "IF TRUE"', 'AS result', '# IF TRUE', 'IF TRUE:']) {
+    'PRINT "IF TRUE"', 'AS result', '# IF TRUE', 'IF TRUE:',
+    'COMMAND', 'COMMAND greet', 'COMMAND GREET:', 'COMMAND GREET <input:string>']) {
     assert.ok(!header.test(line), line);
   }
 });
 
-test('seven editable command snippets are registered only for Flow', () => {
+test('eight editable command snippets are registered only for Flow', () => {
   const contributions = read('package.json').contributes.snippets;
   assert.deepEqual(contributions, [{ language: 'flow', path: './snippets/flow.json' }]);
   const snippets = read(contributions[0].path);
-  assert.equal(Object.keys(snippets).length, 7);
+  assert.equal(Object.keys(snippets).length, 8);
   for (const [name, snippet] of Object.entries(snippets)) {
     const body = Array.isArray(snippet.body) ? snippet.body.join('\n') : snippet.body;
     assert.ok(snippet.description, name);
@@ -266,6 +270,64 @@ test('branch and literal snippets preserve Flow structure', () => {
   ]);
   assert.equal(snippets['PRINT a value'].body, 'PRINT ${1:@result}$0');
   assert.equal(snippets['PRINT an instruction'].body, 'PRINT ${1:Summarize @result.}$0');
+  assert.deepEqual(snippets['COMMAND definition'].body, [
+    'COMMAND ${1:NAME}',
+    '    DO ${2:Describe the task for @input and return its result.}', '$0'
+  ]);
+});
+
+test('COMMAND blocks highlight in files and Markdown without treating data as declarations', () => {
+  const source = [
+    'COMMAND GREET',
+    '    IF @input is exactly "Ana"',
+    '        DO Return a greeting. AS greeting',
+    '    ELSE',
+    '        DO Return another greeting. AS greeting',
+    '    DO Return @greeting unchanged.',
+    '', 'COMMAND OTHER', '    DO Return @input unchanged.',
+    '', 'GREET "Ana" AS greeting',
+    '# COMMAND COMMENT', 'DO Explain these words.', '    COMMAND PROSE',
+    'PRINT "COMMAND STRING"',
+    'CONTEXT', '    COMMAND LITERAL', 'AS context',
+    'RUN sh', '    COMMAND SHELL_DATA', 'AS process'
+  ];
+  for (const [grammar, text, offset] of [
+    [flow, source.join('\n'), 0],
+    [markdown, ['```flow', ...source, '```'].join('\n'), 1]
+  ]) {
+    const tokens = tokenize(grammar, text).slice(offset);
+    for (const line of [0, 7]) {
+      assert.ok(hasScope(tokens[line], 'keyword.control.flow.command'));
+      assert.ok(scopes(tokens[line], 'COMMAND '.length).includes('entity.name.function.flow'));
+    }
+    assert.ok(hasScope(tokens[1], 'keyword.control.flow.if'));
+    assert.ok(hasScope(tokens[3], 'keyword.control.flow.else'));
+    assert.ok(hasScope(tokens[10], 'entity.name.function.flow'));
+    for (const line of [11, 13, 14, 16, 19]) {
+      assert.ok(!hasScope(tokens[line], 'keyword.control.flow.command'), `data line ${line}`);
+    }
+  }
+});
+
+test('USE navigation inside COMMAND bodies retains literal boundaries and source locations', () => {
+  const source = [
+    'COMMAND PREPARE', '    CONTEXT', '        USE hidden.flow', '    AS context',
+    '    RUN sh', '        USE hidden.flow', '    AS process',
+    '    USE helpers/prepare.flow', '    DO Return @input unchanged.',
+    'USE library.flow', 'PREPARE "Ana" AS result'
+  ].join('\n');
+  for (const [text, markdown, offset] of [
+    [source, false, 0], ['```flow\n' + source + '\n```', true, 1]
+  ]) {
+    const references = findUseReferences(text, markdown);
+    assert.deepEqual(references.map(({ filename, line }) => ({ filename, line })), [
+      { filename: 'helpers/prepare.flow', line: 7 + offset },
+      { filename: 'library.flow', line: 9 + offset }
+    ]);
+    for (const reference of references) {
+      assert.equal(text.split('\n')[reference.line].slice(reference.start, reference.end), reference.filename);
+    }
+  }
 });
 
 test('nested literal bodies use the header indentation and resume in the parent block', () => {

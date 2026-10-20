@@ -75,6 +75,13 @@
       "editor.tokenColorCustomizations": {
         "textMateRules": [
           {
+            "name": "Flow: COMMAND",
+            "scope": "keyword.control.flow.command",
+            "settings": {
+              "foreground": "#B392F0"
+            }
+          },
+          {
             "name": "Flow: ASK",
             "scope": "keyword.control.flow.ask",
             "settings": {

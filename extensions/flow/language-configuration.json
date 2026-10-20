@@ -40,14 +40,14 @@
   ],
   "onEnterRules": [
     {
-      "beforeText": "^ *(?!.*: *$)(?:(?:IF|WHILE|REPEAT|ASYNC|RUN)\\b.*|ELSE|CONTEXT) *$",
+      "beforeText": "^ *(?!.*: *$)(?:(?:IF|WHILE|REPEAT|ASYNC|RUN)\\b.*|COMMAND +[A-Z][A-Z0-9_]*|ELSE|CONTEXT) *$",
       "action": {
         "indent": "indent"
       }
     }
   ],
   "indentationRules": {
-    "increaseIndentPattern": "^ *(?!.*: *$)(?:(?:IF|WHILE|REPEAT|ASYNC|RUN)\\b.*|ELSE|CONTEXT) *$",
+    "increaseIndentPattern": "^ *(?!.*: *$)(?:(?:IF|WHILE|REPEAT|ASYNC|RUN)\\b.*|COMMAND +[A-Z][A-Z0-9_]*|ELSE|CONTEXT) *$",
     "decreaseIndentPattern": "^ *(?:ELSE|AS +[a-z][a-z0-9_]*) *$"
   }
 }
