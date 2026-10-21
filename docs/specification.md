@@ -19,9 +19,9 @@ claim that every implementation decision has been resolved.
 ## Language version
 
 This documentation describes **Flow v0.3.0**, including command blocks,
-lowercase functions, and the compact EBNF interpreter contract. The Flow skill and editor
-extension have their own package versions; those are separate from the
-language version.
+named flows with lowercase labels, and the compact EBNF interpreter contract.
+The Flow skill and editor extension have their own package versions; those are
+separate from the language version.
 
 ## 1. Notation and terms
 
@@ -38,7 +38,7 @@ and parentheses for grouping. Uppercase symbols name lexical categories in the
 | Instruction | A command and its complete input, continuation, or body. |
 | Binding | A named value in the current scope. |
 | Reference | `@name`, or an object field such as `@name.field`. |
-| Invocation | The root program, an ordinary child, or a command/function call. |
+| Invocation | The root program, an ordinary child, or a command/flow call. |
 | Task | A background body started with `ASYNC`. |
 | Host | The agent environment supplying tools, processes, and permissions. |
 
@@ -52,7 +52,7 @@ A `.flow` file contains one program. A Markdown file may contain named fenced
 `flow` blocks; only the selected block executes. If the selection or base
 directory is ambiguous, execution stops for clarification.
 
-Command keywords and custom-command names are uppercase; function labels are
+Command keywords and custom-command names are uppercase; flow labels are
 lowercase. Structural indentation uses four spaces per
 level. Dedenting closes a block. Block headers have no trailing colon. Flow
 has no closing keywords, braces around instruction bodies, or semicolon
@@ -85,7 +85,7 @@ stay on one line. A multiline string can be bound before use in a header.
 
 ## 3. Names and references
 
-Binding names and function labels match `[a-z][a-z0-9_]*`. Custom command names match
+Binding names and flow labels match `[a-z][a-z0-9_]*`. Custom command names match
 `[A-Z][A-Z0-9_]*`. Names are case-sensitive.
 
 ```text
@@ -141,7 +141,7 @@ the string. A missing closing delimiter is an error. The next `"""` closes it.
 ## 5. Expressions and conditions
 
 Exact expressions use literals, references, field access, parentheses, numeric
-`+` and `-`, comparisons, and Boolean operators. Functions are called as standalone
+`+` and `-`, comparisons, and Boolean operators. Named flows are called as standalone
 instructions, such as `add_one 4 AS next`; calls do not appear inside expressions.
 
 The contract supports these operator families:
@@ -176,13 +176,13 @@ notation is useful. Both forms must have a determinable result.
 ## 6. Instruction grammar
 
 The following forms cover built-in commands, declarations, and registered
-command/function calls. Lexical categories use the
+command/flow calls. Lexical categories use the
 [interpreter contract](interpreter.md#grammar). Spaces between header
 tokens and the newline after each complete instruction are implicit in this
 notation. A body's indentation is relative to its owning instruction.
 
 ```ebnf
-program     ::= (command | function | instruction)*
+program     ::= (command | flow | instruction)*
 instruction ::= ask | set | context | do | print | branch | repeat | while | continue | break | use | run | async | await | return | call
 binding     ::= "AS" NAME
 ask         ::= "ASK" STRING binding
@@ -197,7 +197,7 @@ continue    ::= "CONTINUE"
 break       ::= "BREAK"
 use         ::= "USE" (MARKDOWN_PATH binding | FLOW_PATH)
 command     ::= "COMMAND" COMMAND_NAME BLOCK
-function    ::= "FUNCTION" NAME BLOCK
+flow        ::= "FLOW" NAME BLOCK
 run         ::= "RUN" ARGV LITERAL? binding?
 async       ::= "ASYNC" NAME BLOCK
 await       ::= "AWAIT" NAME
@@ -205,7 +205,7 @@ return      ::= "RETURN" STRING?
 call        ::= (COMMAND_NAME | NAME) EXPRESSION? binding?
 ```
 
-`COMMAND NAME` and `FUNCTION name` register their indented bodies when reached.
+`COMMAND NAME` and `FLOW name` register their indented bodies when reached.
 Definitions belong at file or selected-block top level and may appear beside
 ordinary instructions. Legacy `AS COMMAND NAME` footers are errors.
 `RUN` permits an absent stdin body; its optional `AS` is on a following aligned
@@ -251,12 +251,12 @@ For `name = "Ana"`, `PRINT "Hello:" @name` displays exactly `Hello: Ana`.
 | `CONTINUE` | Skip the rest of the nearest loop iteration in the current invocation or task. |
 | `BREAK` | Exit the nearest loop in the current invocation or task. |
 | `USE` | Read Markdown as data or run a Flow child with shared bindings and callable registrations. |
-| `COMMAND` / `FUNCTION` | Register a reusable body without executing it. |
+| `COMMAND` / `FLOW` | Register a reusable body without executing it. |
 | `RUN` | Launch a direct process, pass literal stdin, and wait for exit. |
 | `ASYNC` | Start an independent body with an isolated snapshot of bindings. |
 | `AWAIT` | Join a known task successfully and expose its bindings. |
 | `RETURN` | Exit only the current invocation or task, optionally displaying a message. |
-| Command/function call | Invoke a registered definition with isolated locals and one local `@input` value; omitted input is `NULL`. |
+| Command/flow call | Invoke a registered definition with isolated locals and one local `@input` value; omitted input is `NULL`. |
 
 The [command reference](commands.md) provides complete signatures, command
 restrictions, and examples. `CONTINUE` and `BREAK` outside a local loop are
@@ -302,7 +302,7 @@ new Flow instructions.
 | Root program | Current root bindings. |
 | Branch or loop | Shared surrounding bindings. |
 | Ordinary `USE` child | Shared caller bindings. |
-| Command or function | Isolated bindings, with the argument available as `@input`; inherited callable registrations. |
+| Command or flow | Isolated bindings, with the argument available as `@input`; inherited callable registrations. |
 | `ASYNC` task | Isolated binding and registration snapshots taken at launch. |
 | Successful `AWAIT` | Task bindings readable as `@task_name.field`. |
 
@@ -324,11 +324,11 @@ Its final direct instruction supplies the result. `SET` and `DO` can produce
 results; a final `IF`, `PRINT`, or explicit `RETURN` supplies none. A bound call
 without a final result fails instead of reusing an earlier result. An unbound
 call discards the result. Invocation locals and registrations are discarded.
-Commands and functions can call each other, but recursion is an error.
+Commands and flows can call each other, but recursion is an error.
 Calls require registration when reached. Unknown or duplicate definitions,
 built-in collisions, empty bodies, and nested definitions are errors.
 
-Bare lowercase names call functions, `@name` reads data, and `AWAIT name` joins
+Bare lowercase names call flows, `@name` reads data, and `AWAIT name` joins
 a task. Callable names are separate from data/task labels. Relative paths in
 a reusable body use its defining file. See [reusing programs](reuse.md).
 
@@ -352,7 +352,7 @@ failed instructions leave their requested result binding unchanged.
 ## 11. Background tasks
 
 `ASYNC name` launches a body at invocation top level, outside branches, loops,
-and tasks. It does not define a reusable function; `ASYNC FUNCTION` is invalid.
+and tasks. It does not define a reusable flow; `ASYNC FLOW` is invalid.
 Task names are unique and cannot collide with bindings. Task bodies cannot
 perform `ASK`, `USE`, `ASYNC`, or `AWAIT`, including indirectly through calls.
 Tasks cannot depend on unfinished sibling results or concurrently modify the
@@ -366,7 +366,7 @@ tasks; the precise host operation for settlement needs further specification.
 ## 12. State, limits, and errors
 
 Preserve the instruction pointer, bindings, loop state, child-call stack,
-command/function registrations, task handles and results, and evidence across user replies.
+command/flow registrations, task handles and results, and evidence across user replies.
 If that state is lost, stop rather than guessing or replaying effects.
 
 A run may execute at most 1,000 instructions across the root, children, custom

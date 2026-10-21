@@ -2,7 +2,7 @@
   "name": "flow",
   "displayName": "Flow",
   "description": "Flow syntax highlighting, four-space editing, command snippets, and USE navigation.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "vinodliyanage",
   "author": "Vinod Liyanage",
   "icon": "images/icon.png",
@@ -82,8 +82,8 @@
             }
           },
           {
-            "name": "Flow: FUNCTION",
-            "scope": "keyword.control.flow.function",
+            "name": "Flow: FLOW",
+            "scope": "keyword.control.flow.flow",
             "settings": {
               "foreground": "#B392F0"
             }

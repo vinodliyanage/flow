@@ -26,12 +26,12 @@ optional parts. Do not type those brackets. `body` means indented instructions;
 | [BREAK](#break) | Leave a loop. |
 | [USE](#use) | Read Markdown or run a child with shared state. |
 | [COMMAND](#command) | Define an uppercase reusable command. |
-| [FUNCTION](#function) | Define a reusable function with a lowercase label. |
+| [FLOW](#flow) | Define a reusable flow with a lowercase label. |
 | [RUN](#run) | Launch a direct process. |
 | [ASYNC](#async) | Start an independent background task. |
 | [AWAIT](#await) | Join a task and expose its bindings. |
 | [RETURN](#return) | Exit the current invocation. |
-| [Custom command call](#custom-command-call) | Invoke a registered command or function with optional input. |
+| [Custom command call](#custom-command-call) | Invoke a registered command or flow with optional input. |
 
 ## ASK
 
@@ -69,7 +69,7 @@ PRINT @count
 
 **Binding:** `count` holds `3`. `SET` uses the name before `=`, rather than an
 `AS` suffix. Its instruction result is the stored value, so a final direct
-`SET` can supply a command or function's result. Unknown references and invalid
+`SET` can supply a command or flow's result. Unknown references and invalid
 operand types are errors.
 
 ## CONTEXT
@@ -334,19 +334,19 @@ and may expose its final direct instruction's result. Duplicate or built-in
 names, nested definitions, and direct or indirect recursion fail. Legacy
 `AS COMMAND NAME` footers are errors.
 
-## FUNCTION
+## FLOW
 
 ```text
-FUNCTION <name>
+FLOW <name>
     <body>
 ```
 
-Define a reusable function with a lowercase label matching `[a-z][a-z0-9_]*`.
+Define a reusable flow with a lowercase label matching `[a-z][a-z0-9_]*`.
 It follows the same registration, scope, input, and result rules as a command.
-Call its label as a standalone instruction; function calls are not expressions.
+Call its label as a standalone instruction; flow calls are not expressions.
 
 ```flow
-FUNCTION add_one
+FLOW add_one
     SET result = @input + 1
 
 add_one 4 AS next
@@ -354,9 +354,9 @@ PRINT @next
 ```
 
 **Result:** registration produces none; this call returns `5`. Commands and
-functions may call each other. Bare lowercase labels call functions, `@name`
+flows may call each other. Bare lowercase labels call flows, `@name`
 reads data, and `AWAIT name` joins tasks. `ASYNC name` retains its task-body
-syntax and launches immediately; it does not require `FUNCTION`.
+syntax and launches immediately; it does not require `FLOW`.
 
 ## RUN
 
@@ -430,7 +430,7 @@ PRINT @second.greeting
 **Result:** a named task that can be joined with `AWAIT`. Task names are unique
 and cannot collide with bindings. `ASYNC` is at invocation top level, outside
 branches, loops, and tasks. Its body cannot perform `ASK`, `USE`, `ASYNC`, or
-`AWAIT`, including indirectly through function or command calls.
+`AWAIT`, including indirectly through flow or command calls.
 
 Tasks must not depend on unfinished sibling results or concurrently change
 the same resource. If the host cannot run real background work, stop before
@@ -471,18 +471,18 @@ RETURN "Finished."
 ```
 
 **Result:** no returned data. In the root program, `RETURN` ends the run; in an
-ordinary child, it resumes the caller; in a task, command, or function, it exits
+ordinary child, it resumes the caller; in a task, command, or flow, it exits
 only that scope. Outstanding tasks settle before a scope exits.
 
 Use a string message, or omit it. A message displayed by `RETURN` is not a
-command or function's return value. A message-free `RETURN` and normal file end
+command or flow's return value. A message-free `RETURN` and normal file end
 are silent.
 
 ## Custom command call
 
 ```text
 <COMMAND_NAME> [<expression>] [AS <name>]
-<function_name> [<expression>] [AS <name>]
+<flow_name> [<expression>] [AS <name>]
 ```
 
 Reach a definition directly or through `USE`, then pass an optional expression

@@ -15,7 +15,7 @@ use ordinary English conditions so you can read the procedure directly.
 | [Investigate and fix a bug](#investigate-and-fix-a-bug) | A supported proposal, approved fix, and check results. | Evidence before a proposal; approval before edits. |
 | [Meeting follow-up](#meeting-follow-up) | Decisions and action items ready to share. | Missing owners and deadlines trigger a question. |
 | [Customer reply](#customer-reply) | A reply grounded in supplied policy. | Unsupported decisions go back to a human. |
-| [Interactive quiz](#interactive-quiz) | A score from three answers. | Functions, commands, validation loops, and result bindings. |
+| [Interactive quiz](#interactive-quiz) | A score from three answers. | Named flows, commands, validation loops, and result bindings. |
 | [Task planner](#task-planner) | Three tasks ordered by priority and duration. | Reusable helpers and a total time estimate. |
 
 Each listing is included from its `.flow` file. The explanations describe its
@@ -89,9 +89,9 @@ issue refunds, or make changes to a customer account.
 
 ## Interactive quiz
 
-This example uses lowercase functions to select questions and score answers.
-An uppercase command asks each question, validates the reply, and supplies the
-points to the main loop. It needs no external service.
+This example uses named flows to select questions and score answers. An uppercase
+command asks each question, validates the reply, and supplies the points to the
+main loop. It needs no external service.
 
 <<< ../examples/functions-quiz.flow{flow}
 
@@ -101,7 +101,7 @@ These are expected outcomes, not an executed transcript.
 
 ## Task planner
 
-Collect three task names, estimates, and priorities. The function scores a
+Collect three task names, estimates, and priorities. The flow scores a
 priority; the command gathers and validates a task. The final plan sorts higher
 priority first and shorter duration second, preserving entry order for ties.
 

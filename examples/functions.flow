@@ -1,4 +1,4 @@
-FUNCTION add_one
+FLOW add_one
     SET result = @input + 1
 
 COMMAND ADD_TWO
@@ -6,7 +6,7 @@ COMMAND ADD_TWO
     add_one @first AS second
     SET result = @second
 
-FUNCTION add_three
+FLOW add_three
     ADD_TWO @input AS first
     add_one @first AS second
     SET result = @second

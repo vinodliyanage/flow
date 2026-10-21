@@ -117,10 +117,10 @@
       }
     },
     {
-      "match": "^ *(FUNCTION) +([a-z][a-z0-9_]*) *$",
+      "match": "^ *(FLOW) +([a-z][a-z0-9_]*) *$",
       "captures": {
         "1": {
-          "name": "keyword.control.flow.function"
+          "name": "keyword.control.flow.flow"
         },
         "2": {
           "name": "entity.name.function.flow"

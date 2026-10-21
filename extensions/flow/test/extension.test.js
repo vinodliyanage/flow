@@ -62,12 +62,12 @@ test('all current commands have their own scope; legacy syntax has no builtin sc
     ELSE: 'ELSE', REPEAT: 'REPEAT 0 TIMES', WHILE: 'WHILE FALSE', CONTINUE: 'CONTINUE',
     BREAK: 'BREAK', RETURN: 'RETURN "Done"', RUN: 'RUN python3 - @name',
     ASYNC: 'ASYNC frontend', AWAIT: 'AWAIT frontend', COMMAND: 'COMMAND GREET',
-    FUNCTION: 'FUNCTION greet'
+    FLOW: 'FLOW greet'
   };
   for (const [command, source] of Object.entries(cases)) {
     assert.ok(hasScope(tokenize(flow, source)[0], 'keyword.control.flow.' + command.toLowerCase()), command);
   }
-  for (const command of ['WAIT', 'CHECK', 'STOP', 'SHELL', 'THINK', 'RULES', 'FINALLY']) {
+  for (const command of ['WAIT', 'CHECK', 'STOP', 'SHELL', 'THINK', 'RULES', 'FINALLY', 'FUNCTION']) {
     const tokens = tokenize(flow, command + ' value')[0];
     assert.ok(!tokens.some(token => token.scopes.some(scope => scope.startsWith('keyword.control.flow.'))), command);
   }
@@ -99,7 +99,7 @@ test('labels, references, commands, and quoted strings have explicit default col
   assert.equal(colorFor('variable.other.reference.flow'), '#9CDCFE');
   assert.equal(colorFor('entity.name.function.flow'), '#DCDCAA');
   assert.equal(colorFor('keyword.control.flow.command'), '#B392F0');
-  assert.equal(colorFor('keyword.control.flow.function'), '#B392F0');
+  assert.equal(colorFor('keyword.control.flow.flow'), '#B392F0');
   assert.equal(colorFor('string.quoted.double.flow'), '#98C379');
   assert.equal(colorFor('string.quoted.triple.flow'), '#98C379');
   assert.equal(colorFor('meta.literal.block.flow'), undefined);
@@ -193,7 +193,7 @@ test('colon-free block headers indent, ELSE/AS dedent, REPEAT remains pink', () 
   const config = read('language-configuration.json');
   const increase = new RegExp(config.indentationRules.increaseIndentPattern);
   const decrease = new RegExp(config.indentationRules.decreaseIndentPattern);
-  for (const header of ['IF TRUE', 'ELSE', 'REPEAT 0 TIMES', 'WHILE @count < 3', 'ASYNC task', 'CONTEXT', 'RUN python3', 'COMMAND GREET', 'FUNCTION greet']) {
+  for (const header of ['IF TRUE', 'ELSE', 'REPEAT 0 TIMES', 'WHILE @count < 3', 'ASYNC task', 'CONTEXT', 'RUN python3', 'COMMAND GREET', 'FLOW greet']) {
     assert.ok(increase.test(header), header);
   }
   assert.ok(!increase.test('IF TRUE:'));
@@ -225,14 +225,15 @@ test('Enter explicitly indents block headers at any nesting level', () => {
   }]);
   const header = new RegExp(config.onEnterRules[0].beforeText);
   for (const indent of ['', '    ', '        ']) {
-    for (const command of ['IF TRUE', 'ELSE', 'REPEAT 3 TIMES', 'WHILE FALSE', 'ASYNC task', 'CONTEXT', 'RUN sh', 'COMMAND GREET', 'FUNCTION greet']) {
+    for (const command of ['IF TRUE', 'ELSE', 'REPEAT 3 TIMES', 'WHILE FALSE', 'ASYNC task', 'CONTEXT', 'RUN sh', 'COMMAND GREET', 'FLOW greet']) {
       assert.ok(header.test(indent + command), indent + command);
     }
   }
   for (const line of ['ASK "Name?" AS name', 'DO Review @name. AS result',
     'PRINT "IF TRUE"', 'AS result', '# IF TRUE', 'IF TRUE:',
     'COMMAND', 'COMMAND greet', 'COMMAND GREET:', 'COMMAND GREET <input:string>',
-    'FUNCTION', 'FUNCTION GREET', 'FUNCTION greet:', 'FUNCTION greet <input:string>']) {
+    'FLOW', 'FLOW GREET', 'FLOW greet:', 'FLOW greet <input:string>',
+    'FUNCTION greet']) {
     assert.ok(!header.test(line), line);
   }
 });
@@ -277,25 +278,25 @@ test('branch and literal snippets preserve Flow structure', () => {
     'COMMAND ${1:NAME}',
     '    DO ${2:Describe the task for @input and return its result.}', '$0'
   ]);
-  assert.deepEqual(snippets['FUNCTION definition'].body, [
-    'FUNCTION ${1:name}',
+  assert.deepEqual(snippets['FLOW definition'].body, [
+    'FLOW ${1:name}',
     '    DO ${2:Describe the task for @input and return its result.}', '$0'
   ]);
 });
 
-test('lowercase functions highlight as instructions while task labels and data keep their scopes', () => {
+test('named flow calls highlight as instructions while task labels and data keep their scopes', () => {
   const source = [
-    'FUNCTION add_one', '    SET result = @input + 1',
+    'FLOW add_one', '    SET result = @input + 1',
     'COMMAND INCREMENT', '    add_one @input AS result', '    SET output = @result',
     'add_one 4 AS next', 'ASYNC preview', '    add_one 9 AS result',
     'AWAIT preview', 'PRINT @preview.result',
-    '# FUNCTION comment', '# add_one 1',
-    'DO Explain the following text.', '    FUNCTION prose', '    add_one @input',
+    '# FLOW comment', '# add_one 1',
+    'DO Explain the following text.', '    FLOW prose', '    add_one @input',
     'PRINT Describe this text.', '    add_one @input',
-    'PRINT "FUNCTION literal; add_one"', 'SET text = """',
-    'FUNCTION string_data', 'add_one 1', '"""',
-    'CONTEXT', '    FUNCTION context_data', '    add_one 1', 'AS context',
-    'RUN sh', '    FUNCTION shell_data', '    add_one 1', 'AS process',
+    'PRINT "FLOW literal; add_one"', 'SET text = """',
+    'FLOW string_data', 'add_one 1', '"""',
+    'CONTEXT', '    FLOW context_data', '    add_one 1', 'AS context',
+    'RUN sh', '    FLOW shell_data', '    add_one 1', 'AS process',
     'add_one 2 AS result'
   ];
   for (const [grammar, text, offset] of [
@@ -303,11 +304,11 @@ test('lowercase functions highlight as instructions while task labels and data k
     [markdown, ['```flow', ...source, '```'].join('\n'), 1]
   ]) {
     const tokens = tokenize(grammar, text).slice(offset);
-    assert.ok(hasScope(tokens[0], 'keyword.control.flow.function'));
-    assert.ok(scopes(tokens[0], 'FUNCTION '.length).includes('entity.name.function.flow'));
+    assert.ok(hasScope(tokens[0], 'keyword.control.flow.flow'));
+    assert.ok(scopes(tokens[0], 'FLOW '.length).includes('entity.name.function.flow'));
     for (const line of [3, 5, 7, 30]) {
       assert.ok(scopes(tokens[line], source[line].indexOf('add_one'))
-        .includes('entity.name.function.flow'), `function call line ${line}`);
+        .includes('entity.name.function.flow'), `flow call line ${line}`);
     }
     for (const line of [6, 8]) {
       assert.ok(scopes(tokens[line], source[line].indexOf('preview'))
@@ -315,12 +316,12 @@ test('lowercase functions highlight as instructions while task labels and data k
     }
     assert.ok(hasScope(tokens[9], 'variable.other.reference.flow'));
     for (const line of [10, 11, 13, 14, 16, 17, 19, 20, 23, 24, 27, 28]) {
-      assert.ok(!hasScope(tokens[line], 'keyword.control.flow.function'), `data line ${line}`);
+      assert.ok(!hasScope(tokens[line], 'keyword.control.flow.flow'), `data line ${line}`);
       assert.ok(!hasScope(tokens[line], 'entity.name.function.flow'), `data line ${line}`);
     }
   }
-  for (const source of ['FUNCTION GREET', 'FUNCTION mixedCase', 'FUNCTION greet <input:string>']) {
-    assert.ok(!hasScope(tokenize(flow, source)[0], 'keyword.control.flow.function'), source);
+  for (const source of ['FLOW GREET', 'FLOW mixedCase', 'FLOW greet <input:string>', 'FUNCTION greet']) {
+    assert.ok(!hasScope(tokenize(flow, source)[0], 'keyword.control.flow.flow'), source);
   }
   for (const source of ['addOne 1', 'add_one(1)', 'SET value = add_one(1)', 'PRINT @add_one']) {
     assert.ok(!hasScope(tokenize(flow, source)[0], 'entity.name.function.flow'), source);
@@ -363,7 +364,7 @@ test('COMMAND blocks highlight in files and Markdown without treating data as de
 test('USE navigation inside callable bodies retains literal boundaries and source locations', () => {
   for (const [declaration, call] of [
     ['COMMAND PREPARE', 'PREPARE "Ana" AS result'],
-    ['FUNCTION prepare', 'prepare "Ana" AS result']
+    ['FLOW prepare', 'prepare "Ana" AS result']
   ]) {
     const source = [
       declaration, '    CONTEXT', '        USE hidden.flow', '    AS context',

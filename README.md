@@ -61,10 +61,11 @@ Agents interpret programs using the Flow skill in `skills/flow/` and its
 complete interpreter contract. This repository does not provide a standalone
 runtime; natural-language task results still depend on agent judgment.
 
-Flow **0.3.0** defines reusable uppercase commands and lowercase functions:
+Flow **0.3.0** defines reusable uppercase commands and named flows with
+lowercase labels:
 
 ```flow
-FUNCTION add_one
+FLOW add_one
     SET result = @input + 1
 
 COMMAND ADD_TWO

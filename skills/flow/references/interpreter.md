@@ -11,7 +11,7 @@ Uppercase symbols are lexical categories defined below. Spaces and logical
 instruction endings are implicit; BLOCK/LITERAL include their layout boundaries.
 
 ```ebnf
-program     ::= (command | function | instruction)*
+program     ::= (command | flow | instruction)*
 instruction ::= ask | set | context | do | print | branch | repeat | while | continue | break | use | run | async | await | return | call
 binding     ::= "AS" NAME
 ask         ::= "ASK" STRING binding
@@ -26,7 +26,7 @@ continue    ::= "CONTINUE"
 break       ::= "BREAK"
 use         ::= "USE" (MARKDOWN_PATH binding | FLOW_PATH)
 command     ::= "COMMAND" COMMAND_NAME BLOCK
-function    ::= "FUNCTION" NAME BLOCK
+flow        ::= "FLOW" NAME BLOCK
 run         ::= "RUN" ARGV LITERAL? binding?
 async       ::= "ASYNC" NAME BLOCK
 await       ::= "AWAIT" NAME
@@ -66,7 +66,7 @@ Unlisted results are absent, not NULL.
 | WHILE | Retest before every iteration, including the first; share bindings. |
 | CONTINUE / BREAK | Skip the local iteration / exit the nearest local loop. Fail outside a loop; never control a caller's loop. |
 | USE | Read only when reached. Markdown returns text; Flow runs synchronously with shared bindings/registrations, then resumes. |
-| COMMAND / FUNCTION | Register its body when reached, without executing it; rules below. No result. |
+| COMMAND / FLOW | Register its body when reached, without executing it; rules below. No result. |
 | RUN | Launch directly in host working directory; optional literal stdin; await exit, default timeout 30 seconds. Result: stdout/stderr strings and integer exit_code. Missing executable, timeout, or nonzero exit fails; retain available diagnostics. Its optional AS is aligned on a following line, even without stdin. |
 | ASYNC | Invocation top level, outside branches/loops/tasks. Launch real background work with isolated binding/registration snapshots; advance after launch. Unique task name cannot collide with bindings. No simulated concurrency. |
 | AWAIT | Join a known task successfully; expose its bindings as @task.field. Repeated joins reuse results. |
@@ -92,7 +92,7 @@ resume, source-location, or completion narration. Wait silently after ASK;
 message-free RETURN and file end are silent. Higher-priority host requirements
 still apply.
 
-Use uppercase commands and lowercase function calls; four-space structural
+Use uppercase commands and lowercase flow calls; four-space structural
 indentation, no tabs, trailing colons, closing keywords, or semicolon separators.
 Blank lines do nothing.
 Full-line # comments and paired ### comment blocks do not execute. Parse literal
@@ -115,7 +115,7 @@ exact input fails without prose fallback. Resolve everything before output:
 strings unchanged, others JSON, parts joined by one space. Other nonempty input
 is prose; only prose accepts once-indented continuations joined with spaces.
 
-Definitions use COMMAND with an uppercase name or FUNCTION with a lowercase
+Definitions use COMMAND with an uppercase name or FLOW with a lowercase
 label, only at file/selected-block top level. Allow several definitions alongside
 ordinary instructions. Reject empty/nested bodies, duplicate/built-in names, and
 direct/indirect recursion. Calls require registration when reached.
@@ -124,10 +124,10 @@ relative paths use the defining file. Normal body end preserves its final direct
 instruction's result; explicit RETURN supplies none. A bound call ending without
 a result fails without reusing earlier output. Unbound calls discard results.
 Both callable kinds share these input/scope/result rules and may call each other.
-Function labels are separate from bindings/task labels: bare names call functions,
+Flow labels are separate from bindings/task labels: bare names call flows,
 @name reads data, and AWAIT name joins tasks. Calls are standalone instructions,
 not expressions. ASYNC name still launches its indented body immediately; it
-does not define a reusable function or accept an ASYNC FUNCTION header.
+does not define a reusable flow or accept an ASYNC FLOW header.
 AS COMMAND footers are replaced: report an error suggesting COMMAND NAME with
 an indented body; never register or migrate the old form while running.
 

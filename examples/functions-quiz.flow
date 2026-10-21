@@ -1,4 +1,4 @@
-FUNCTION get_question
+FLOW get_question
     IF @input is exactly 1
         SET question = {"prompt": "How many minutes are in an hour? a) 30 b) 60 c) 90", "answer": "b"}
     ELSE
@@ -8,7 +8,7 @@ FUNCTION get_question
             SET question = {"prompt": "How many sides does a triangle have? a) 3 b) 4 c) 5", "answer": "a"}
     SET result = @question
 
-FUNCTION score_answer
+FLOW score_answer
     IF @input.given is exactly @input.expected
         SET points = 1
     ELSE

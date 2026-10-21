@@ -40,7 +40,7 @@ semantics. Read it first and never emit commands or forms it does not define.
 | Repeat while a condition remains true | `WHILE condition` |
 | Skip or leave the current loop | `CONTINUE` / `BREAK` |
 | Import data or compose another Flow | `USE` |
-| Define a reusable operation | `COMMAND NAME` or `FUNCTION name` with an indented body |
+| Define a reusable operation | `COMMAND NAME` or `FLOW name` with an indented body |
 | Run a specified process | `RUN` |
 | Start and join independent work | `ASYNC` / `AWAIT` |
 | Exit the current scope | `RETURN` |
@@ -69,8 +69,8 @@ semantics. Read it first and never emit commands or forms it does not define.
   work into a process or invent scripts.
 - Default to one `.flow` file. Add `USE` children only when the prompt requires
   reuse or the workflow becomes materially clearer as separate programs. Use a
-  Markdown `USE` only for imported data. Add a command or function only when
-  reuse makes the program clearer. Commands use uppercase names; functions use
+  Markdown `USE` only for imported data. Add a command or flow only when
+  reuse makes the program clearer. Commands use uppercase names; flows use
   lowercase labels. Call either as an instruction, pass one value as local
   `@input`, and optionally bind its final direct instruction's result with `AS`.
 - Use `ASYNC` only for independent tasks that can run concurrently without
