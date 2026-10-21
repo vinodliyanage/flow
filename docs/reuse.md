@@ -1,11 +1,11 @@
 ---
-description: Reuse guidance and workflows with USE, share bindings with child programs, and define isolated commands and functions.
+description: Reuse guidance and workflows with USE, share bindings with child programs, and define isolated commands and flows.
 ---
 
 # Reusing programs
 
 `USE` lets a program read Markdown or run a child program. Reached `COMMAND`
-and `FUNCTION` declarations register reusable bodies without executing them.
+and `FLOW` declarations register reusable bodies without executing them.
 The file is loaded when execution reaches `USE`. Relative paths are
 resolved from the file containing that instruction.
 
@@ -98,14 +98,14 @@ registrations with their callers. Definitions registered through a child during
 a command invocation remain local to that invocation. Relative paths inside
 a reusable body use its defining file.
 
-## Functions
+## Named flows
 
-Functions use lowercase labels and follow the same input, local-state, and
+Named flows use lowercase labels and follow the same input, local-state, and
 result rules as commands. Define and call them in the same file, or import
 definitions through `USE`:
 
 ```flow
-FUNCTION add_one
+FLOW add_one
     SET result = @input + 1
 
 COMMAND ADD_TWO
@@ -117,8 +117,8 @@ ADD_TWO 3 AS total
 PRINT @total
 ```
 
-This program displays `5`. The command calls a function twice, each time with
-isolated local bindings. Commands and functions may call each other.
+This program displays `5`. The command calls a flow twice, each time with
+isolated local bindings. Commands and flows may call each other.
 Omitted input becomes local `NULL`. Calls are standalone instructions, so
 write `add_one 3 AS next`, rather than placing a call inside `SET`.
 
@@ -126,10 +126,10 @@ A successful final direct `SET` or `DO` supplies a result. A final `IF`, `PRINT`
 or explicit `RETURN` does not. Binding a call with no final result is an error;
 earlier results are not reused. `AS` stores a result only after success.
 
-Function labels start with a lowercase letter and contain lowercase letters,
-digits, or underscores. Bare labels call functions; `@name` reads a binding.
+Flow labels start with a lowercase letter and contain lowercase letters,
+digits, or underscores. Bare labels call flows; `@name` reads a binding.
 `ASYNC name` still starts a task body immediately, and `AWAIT name` joins it.
-Task bodies can call reusable functions, subject to the task restrictions.
+Task bodies can call reusable flows, subject to the task restrictions.
 
 ## Choose shared or isolated state
 
@@ -137,7 +137,7 @@ Task bodies can call reusable functions, subject to the task restrictions.
 | --- | --- | --- |
 | Markdown `USE` | A task needs saved guidance. | Stores text in one binding. |
 | Ordinary child | Several steps form part of the same workflow. | Shares caller bindings. |
-| Command or function | A reusable operation needs its own locals. | Receives local `@input`; optionally returns its final direct result. |
+| Command or flow | A reusable operation needs its own locals. | Receives local `@input`; optionally returns its final direct result. |
 | `ASYNC` task | Independent work can run in the background. | Receives a snapshot; exposes results after `AWAIT`. |
 
 Keep a workflow in one file until reuse makes its path easier to understand.

@@ -26,6 +26,6 @@ For prompt conversion, also read [conversion](references/conversion.md).
 For editor setup, also read [extension setup](references/extension-setup.md).
 Load these guides only for their corresponding tasks.
 
-Author plain command/function blocks and English conditions. Execute only on
+Author plain command/flow blocks and English conditions. Execute only on
 explicit request; authoring/review/validation never authorize a run. Add no
 unrequested work.

@@ -34,7 +34,7 @@ Natural-language tasks still require agent judgment, and their results can vary.
 ## Ask and wait across replies
 
 An unanswered `ASK` stays active. On a later user reply, the agent retains its
-location, bindings, loop state, child stack, command/function registrations, task handles,
+location, bindings, loop state, child stack, command/flow registrations, task handles,
 results, and evidence. It stores the fresh answer and continues from there.
 
 If the agent loses that state, it must stop rather than guess its position or

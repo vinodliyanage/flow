@@ -1,4 +1,4 @@
-FUNCTION score_priority
+FLOW score_priority
     IF @input is exactly "high"
         SET score = 3
     ELSE
