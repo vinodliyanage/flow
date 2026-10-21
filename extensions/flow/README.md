@@ -15,17 +15,18 @@ Blocks use four spaces without colons. CONTEXT/RUN bodies and
 Raw triple-quoted strings (`"""..."""`) preserve multiline text without interpolation,
 escapes, comment parsing, or file links.
 Declared labels, `@references`, and callable names have distinct default
-colors. Only quoted strings use the same `#98C379` green as the documentation;
+colors. `FLOW` uses bold emerald (`#34D399`) to mark reusable subflow definitions.
+Only quoted strings use the same `#98C379` green as the documentation;
 literal CONTEXT and RUN bodies keep the editor's normal text color. All defaults
 remain overridable by the active theme.
 
 ## Install
 
 Run **Extensions: Install from VSIX...** and choose
-`skills/flow/assets/flow-0.3.1.vsix` from the repository root, or:
+`skills/flow/assets/flow-0.3.2.vsix` from the repository root, or:
 
 ```sh
-cursor --install-extension /absolute/path/to/flow/skills/flow/assets/flow-0.3.1.vsix
+cursor --install-extension /absolute/path/to/flow/skills/flow/assets/flow-0.3.2.vsix
 ```
 
 Reload the window if open files have not refreshed. `.flow` uses **Flow** language

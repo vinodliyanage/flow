@@ -99,7 +99,7 @@ test('labels, references, commands, and quoted strings have explicit default col
   assert.equal(colorFor('variable.other.reference.flow'), '#9CDCFE');
   assert.equal(colorFor('entity.name.function.flow'), '#DCDCAA');
   assert.equal(colorFor('keyword.control.flow.command'), '#B392F0');
-  assert.equal(colorFor('keyword.control.flow.flow'), '#B392F0');
+  assert.equal(colorFor('keyword.control.flow.flow'), '#34D399');
   assert.equal(colorFor('string.quoted.double.flow'), '#98C379');
   assert.equal(colorFor('string.quoted.triple.flow'), '#98C379');
   assert.equal(colorFor('meta.literal.block.flow'), undefined);
