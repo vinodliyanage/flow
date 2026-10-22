@@ -13,25 +13,23 @@
       "match": "^ *#.*$"
     },
     {
-      "begin": "^( *)(CONTEXT) *$",
-      "end": "^\\1(AS) +([a-z][a-z0-9_]*) *$",
+      "begin": "^( *)(context)(?: +(as) +(@[a-z][a-z0-9_]*))? *$",
+      "while": "^(?:\\1 {4}|[ \\t]*$)",
       "beginCaptures": {
         "2": {
           "name": "keyword.control.flow.context"
-        }
-      },
-      "endCaptures": {
-        "1": {
+        },
+        "3": {
           "name": "keyword.other.flow"
         },
-        "2": {
+        "4": {
           "name": "variable.other.flow"
         }
       },
       "contentName": "meta.literal.block.flow"
     },
     {
-      "begin": "^( *)(RUN)\\b(.*)$",
+      "begin": "^( *)(run)\\b(.*)$",
       "while": "^(?:\\1 {4}|[ \\t]*$)",
       "beginCaptures": {
         "2": {
@@ -48,7 +46,7 @@
       "contentName": "meta.literal.block.flow"
     },
     {
-      "begin": "^( *)(DO)\\b(?!.*\"\"\")(.*)$",
+      "begin": "^( *)(do)\\b(?!.*\"\"\")(.*)$",
       "beginCaptures": {
         "2": {
           "name": "keyword.control.flow.do"
@@ -69,7 +67,7 @@
       "end": "^(?!\\1 {4}(?! )\\S)"
     },
     {
-      "begin": "^( *)(PRINT)\\b(?!.*\"\"\")(.*)$",
+      "begin": "^( *)(print)\\b(?!.*\"\"\")(.*)$",
       "beginCaptures": {
         "2": {
           "name": "keyword.control.flow.print"
@@ -90,7 +88,7 @@
       "end": "^(?!\\1 {4}(?! )\\S)"
     },
     {
-      "match": "^ *(DO)\\b",
+      "match": "^ *(do)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.do"
@@ -98,7 +96,7 @@
       }
     },
     {
-      "match": "^ *(PRINT)\\b",
+      "match": "^ *(print)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.print"
@@ -106,7 +104,7 @@
       }
     },
     {
-      "match": "^ *(COMMAND) +([A-Z][A-Z0-9_]*) *$",
+      "match": "^ *(command) +([A-Z][A-Z0-9_]*) *$",
       "captures": {
         "1": {
           "name": "keyword.control.flow.command"
@@ -117,7 +115,7 @@
       }
     },
     {
-      "match": "^ *(FLOW) +([a-z][a-z0-9_]*) *$",
+      "match": "^ *(flow) +([a-z][a-z0-9_]*) *$",
       "captures": {
         "1": {
           "name": "keyword.control.flow.flow"
@@ -128,20 +126,20 @@
       }
     },
     {
-      "match": "^ *(SET|ASYNC|AWAIT) +([a-z][a-z0-9_]*)",
+      "match": "^ *(set|async|await) +([a-z][a-z0-9_]*)",
       "captures": {
         "1": {
           "patterns": [
             {
-              "match": "SET",
+              "match": "set",
               "name": "keyword.control.flow.set"
             },
             {
-              "match": "ASYNC",
+              "match": "async",
               "name": "keyword.control.flow.async"
             },
             {
-              "match": "AWAIT",
+              "match": "await",
               "name": "keyword.control.flow.await"
             }
           ]
@@ -152,7 +150,7 @@
       }
     },
     {
-      "match": "^ *(USE) +(.+?\\.md(?:#[^\\r\\n]+?)?) +(AS) +([a-z][a-z0-9_]*) *$",
+      "match": "^ *(use) +(.+?\\.md(?:#[^\\r\\n]+?)?) +(as) +(@[a-z][a-z0-9_]*) *$",
       "captures": {
         "1": {
           "name": "keyword.control.flow.use"
@@ -169,7 +167,7 @@
       }
     },
     {
-      "match": "^ *(USE) +(.+?\\.flow) *$",
+      "match": "^ *(use) +(.+?\\.flow) *$",
       "captures": {
         "1": {
           "name": "keyword.control.flow.use"
@@ -180,7 +178,7 @@
       }
     },
     {
-      "match": "^ *(ASK)\\b",
+      "match": "^ *(ask)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.ask"
@@ -188,7 +186,7 @@
       }
     },
     {
-      "match": "^ *(SET)\\b",
+      "match": "^ *(set)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.set"
@@ -196,7 +194,7 @@
       }
     },
     {
-      "match": "^ *(USE)\\b",
+      "match": "^ *(use)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.use"
@@ -204,7 +202,7 @@
       }
     },
     {
-      "match": "^ *(IF)\\b",
+      "match": "^ *(if)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.if"
@@ -212,7 +210,7 @@
       }
     },
     {
-      "match": "^ *(ELSE)\\b",
+      "match": "^ *(else)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.else"
@@ -220,7 +218,7 @@
       }
     },
     {
-      "match": "^ *(REPEAT)\\b",
+      "match": "^ *(repeat)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.repeat"
@@ -228,7 +226,7 @@
       }
     },
     {
-      "match": "^ *(WHILE)\\b",
+      "match": "^ *(while)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.while"
@@ -236,7 +234,7 @@
       }
     },
     {
-      "match": "^ *(CONTINUE)\\b",
+      "match": "^ *(continue)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.continue"
@@ -244,7 +242,7 @@
       }
     },
     {
-      "match": "^ *(BREAK)\\b",
+      "match": "^ *(break)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.break"
@@ -252,7 +250,7 @@
       }
     },
     {
-      "match": "^ *(RETURN)\\b",
+      "match": "^ *(return)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.return"
@@ -260,7 +258,7 @@
       }
     },
     {
-      "match": "^ *(ASYNC)\\b",
+      "match": "^ *(async)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.async"
@@ -268,7 +266,7 @@
       }
     },
     {
-      "match": "^ *(AWAIT)\\b",
+      "match": "^ *(await)\\b",
       "captures": {
         "1": {
           "name": "keyword.control.flow.await"
@@ -276,10 +274,7 @@
       }
     },
     {
-      "include": "#binding"
-    },
-    {
-      "match": "^ *(AS) +([a-z][a-z0-9_]*) *$",
+      "match": "^ *(as) +(@[a-z][a-z0-9_]*) *$",
       "captures": {
         "1": {
           "name": "keyword.other.flow"
@@ -288,6 +283,9 @@
           "name": "variable.other.flow"
         }
       }
+    },
+    {
+      "include": "#binding"
     },
     {
       "match": "^ *([A-Z][A-Z0-9_]*)\\b",
@@ -326,7 +324,7 @@
       "match": "@[a-z][a-z0-9_]*(?:\\.[A-Za-z_][A-Za-z0-9_]*)*\\b"
     },
     "binding": {
-      "match": "\\b(AS) +([a-z][a-z0-9_]*) *$",
+      "match": "\\b(as) +(@[a-z][a-z0-9_]*) *$",
       "captures": {
         "1": {
           "name": "keyword.other.flow"
@@ -340,15 +338,15 @@
       "patterns": [
         {
           "name": "constant.language.flow.true",
-          "match": "\\bTRUE\\b"
+          "match": "\\btrue\\b"
         },
         {
           "name": "constant.language.flow.false",
-          "match": "\\bFALSE\\b"
+          "match": "\\bfalse\\b"
         },
         {
           "name": "constant.language.flow.null",
-          "match": "\\bNULL\\b"
+          "match": "\\bnull\\b"
         },
         {
           "name": "constant.numeric.flow",
@@ -356,7 +354,7 @@
         },
         {
           "name": "keyword.operator.flow",
-          "match": "\\b(?:AND|OR|NOT)\\b|==|!=|<=|>=|[=<>+\\-]"
+          "match": "\\b(?:and|or|not)\\b|==|!=|<=|>=|[=<>+\\-]"
         },
         {
           "name": "punctuation.section.flow",
@@ -373,17 +371,17 @@
           "include": "#string"
         },
         {
-          "include": "#reference"
+          "include": "#binding"
         },
         {
-          "include": "#binding"
+          "include": "#reference"
         },
         {
           "include": "#value"
         },
         {
           "name": "keyword.other.flow",
-          "match": "\\b(?:AS|TIMES)\\b"
+          "match": "\\btimes\\b"
         }
       ]
     },

@@ -109,8 +109,8 @@ priority first and shorter duration second, preserving entry order for ties.
 
 ## Write your own workflow
 
-Use `IF @approval is not exactly "yes"` for a precise approval check, or
-`IF @review identifies blocking issues` for a judgment over available evidence.
+Use `if @approval is not exactly "yes"` for a precise approval check, or
+`if @review identifies blocking issues` for a judgment over available evidence.
 English conditions are part of Flow, not comments around the program. Symbolic
 expressions remain supported in the [language reference](specification.md).
 

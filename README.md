@@ -30,26 +30,26 @@ Traditional prompt:
 Equivalent Flow:
 
 ```flow
-ASK "Which release should I prepare?" AS release
+ask "Which release should I prepare?" as @release
 
-DO Review @release in the current project for bugs and breaking changes.
-    Return the findings and identify any blocking issues. AS review
+do Review @release in the current project for bugs and breaking changes.
+    Return the findings and identify any blocking issues as @review
 
-IF @review identifies blocking issues
-    PRINT @review
-    RETURN "Resolve blockers before continuing."
+if @review identifies blocking issues
+    print @review
+    return "Resolve blockers before continuing."
 
-DO Draft release notes using @release and @review. AS notes
-PRINT @notes
+do Draft release notes using @release and @review as @notes
+print @notes
 
-ASK "Approve these notes? Type yes to approve." AS approval
-IF @approval is not exactly "yes"
-    RETURN "Release notes were not approved."
+ask "Approve these notes? Type yes to approve." as @approval
+if @approval is not exactly "yes"
+    return "Release notes were not approved."
 
-DO Create a release handoff using @release, @review, and @notes.
+do Create a release handoff using @release, @review, and @notes.
     Include a summary, notes, review findings,
-    and next steps. AS handoff
-PRINT @handoff
+    and next steps as @handoff
+print @handoff
 ```
 
 Start with the [introduction](docs/flow-language.md) and
@@ -61,35 +61,37 @@ Agents interpret programs using the Flow skill in `skills/flow/` and its
 complete interpreter contract. This repository does not provide a standalone
 runtime; natural-language task results still depend on agent judgment.
 
-Flow **0.3.0** defines reusable uppercase commands and named flows with
-lowercase labels:
+Flow **0.4.0** uses lowercase keywords and `as @name` result bindings.
+For `run` and `context`, bind on the header or after the body on an aligned
+line; other result bindings stay inline.
+Custom command names are uppercase; named flows use lowercase labels:
 
 ```flow
-FLOW add_one
-    SET result = @input + 1
+flow add_one
+    set result = @input + 1
 
-COMMAND ADD_TWO
-    add_one @input AS first
-    add_one @first AS second
-    SET result = @second
+command ADD_TWO
+    add_one @input as @first
+    add_one @first as @second
+    set result = @second
 
-ADD_TWO 3 AS total
-PRINT @total
+ADD_TWO 3 as @total
+print @total
 ```
 
 Both forms receive isolated local `@input` and can expose their final direct
-instruction's result with `AS`. `ASYNC name` retains its existing task-body
+instruction's result with `as`. `async name` retains its existing task-body
 syntax. See [reusing programs](docs/reuse.md) and the
 [interactive quiz](examples/functions-quiz.flow).
 
-Conditions can be ordinary English, such as `IF @review identifies blocking
+Conditions can be ordinary English, such as `if @review identifies blocking
 issues`. Prefer clear sentences when they express the decision naturally;
 exact expressions are available when needed. See the
 [real-world examples](docs/examples.md) for reviews, bug fixes, meeting
 follow-ups, and customer replies.
 
 The [Flow extension](extensions/flow/README.md) provides highlighting,
-indentation, and USE file links in Cursor and VS Code.
+indentation, and `use` file links in Cursor and VS Code.
 
 ## Install
 

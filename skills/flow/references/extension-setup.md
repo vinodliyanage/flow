@@ -3,9 +3,9 @@
 Use this guide only when the user asks to install or configure Flow editor
 support. Installing the extension does not authorize executing a Flow program.
 
-The bundled [Flow 0.3.2 VSIX](../assets/flow-0.3.2.vsix) supports
+The bundled [Flow 0.4.0 VSIX](../assets/flow-0.4.0.vsix) supports
 Cursor and VS Code. It provides syntax highlighting and indentation for `.flow`
-files and Markdown `flow` fences, plus navigation for literal `USE` paths.
+files and Markdown `flow` fences, plus navigation for literal `use` paths.
 Four-space editing defaults and command snippets apply to `.flow` files only. It
 does not execute, validate, or format Flow programs and has no runtime
 dependencies.
@@ -21,15 +21,15 @@ dependencies.
    code --list-extensions --show-versions
    ```
 
-   The extension identifier is `vinodliyanage.flow`. If version `0.3.2` is
+   The extension identifier is `vinodliyanage.flow`. If version `0.4.0` is
    already active, do not reinstall it. Never replace a newer version unless
    the user explicitly requests a downgrade.
 3. Install the VSIX using the CLI for the requested editor, passing its absolute
    path as one argument:
 
    ```sh
-   cursor --install-extension /absolute/path/flow-0.3.2.vsix
-   code --install-extension /absolute/path/flow-0.3.2.vsix
+   cursor --install-extension /absolute/path/flow-0.4.0.vsix
+   code --install-extension /absolute/path/flow-0.4.0.vsix
    ```
 
    When a named profile is required and the editor supports it, include that
@@ -38,19 +38,19 @@ dependencies.
 4. If the editor CLI is unavailable, open the Command Palette, run
    **Extensions: Install from VSIX...**, and select the bundled file. Do not
    download or substitute another extension.
-5. Verify `vinodliyanage.flow@0.3.2` in the requested editor/profile. Reload the
+5. Verify `vinodliyanage.flow@0.4.0` in the requested editor/profile. Reload the
    editor window when open files do not refresh.
 
 ## Verify authoring support
 
 Open a `.flow` file and confirm its language mode is **Flow**. Verify that known
 commands are highlighted and that Command-click on macOS or Ctrl-click on
-Windows/Linux opens a literal `USE` target relative to the containing file.
+Windows/Linux opens a literal `use` target relative to the containing file.
 Markdown must remain in Markdown mode while fenced `flow` blocks are highlighted.
 Navigation opens referenced files; it never executes them.
 
-In a `.flow` file, use **Trigger Suggest** after `ASK`, `DO`, `PRINT`, `IF`,
-`CONTEXT`, `COMMAND`, or `FLOW`, or use **Insert Snippet**. Select a template and use Tab to move
+In a `.flow` file, use **Trigger Suggest** after `ask`, `do`, `print`, `if`,
+`context`, `command`, or `flow`, or use **Insert Snippet**. Select a template and use Tab to move
 through its fields. The extension defaults to four spaces; explicit user and
 workspace settings still take precedence. Snippets and these defaults do not
 change Markdown editing. Do not modify settings to force the defaults.

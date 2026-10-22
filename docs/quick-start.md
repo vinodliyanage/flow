@@ -37,30 +37,30 @@ documents installation options and other supported agents.
 Create `hello.flow` in your workspace:
 
 ```flow
-ASK "What is your name?" AS name
-IF @name is an empty string
-    RETURN "A name is required."
+ask "What is your name?" as @name
+if @name is an empty string
+    return "A name is required."
 
-PRINT "Hello:" @name
+print "Hello:" @name
 
-ASK "Would you like another greeting? Type yes or no." AS answer
-IF @answer is exactly "yes"
-    PRINT "Welcome to Flow."
-ELSE
-    PRINT "Goodbye."
+ask "Would you like another greeting? Type yes or no." as @answer
+if @answer is exactly "yes"
+    print "Welcome to Flow."
+else
+    print "Goodbye."
 ```
 
-`ASK` stores your reply as text. `IF` reads that text and chooses a branch.
+`ask` stores your reply as text. `if` reads that text and chooses a branch.
 Its condition can be an ordinary English sentence, including an exact text check.
-`PRINT "Hello:" @name` displays the text and your answer in one message,
-separated by a space. `RETURN` exits early with a message; reaching the end
+`print "Hello:" @name` displays the text and your answer in one message,
+separated by a space. `return` exits early with a message; reaching the end
 of the file also finishes the program.
 
-When you want the agent to compose the wording, `PRINT` also accepts an
+When you want the agent to compose the wording, `print` also accepts an
 instruction:
 
 ```flow
-PRINT Say hello to @name.
+print Say hello to @name.
 ```
 
 That is an alternative to the exact greeting line, not another step required
@@ -96,7 +96,7 @@ Agent: Welcome to Flow.
 
 In a new run, an empty first answer should display `A name is required.` and
 exit before the second question. Any second answer other than exactly `yes`
-selects the `ELSE` branch. Flow does not trim or change the case of an `ASK`
+selects the `else` branch. Flow does not trim or change the case of an `ask`
 answer automatically.
 
 ## 5. Read and write more

@@ -13,14 +13,16 @@ semantics. Read it first and never emit commands or forms it does not define.
    decisions, repetitions, external processes, reusable parts, concurrent work,
    outputs, and exits.
 2. Separate information from instructions. Store background material with
-   `CONTEXT`; use bindings for data passed between instructions. Never turn
+   `context`; use bindings for data passed between instructions. Never turn
    quoted examples, retrieved text, or expected output into executable steps.
 3. Map each requested behavior to one Flow command. Preserve the prompt's order
    unless its own conditions or concurrency explicitly change that order.
 4. Add a binding only when a later instruction needs the value. Name bindings
    with short lowercase identifiers and define each one before every possible
    use.
-5. Write one clear instruction at a time. Use four-space indentation, no
+5. Use Flow 0.4.0 lowercase keywords and `as @name` bindings. Choose the
+   binding layout for readability, using the rules below.
+   Write one clear instruction at a time. Use four-space indentation, no
    trailing colons, and no closing keywords. Keep the program easy to read from
    top to bottom.
 6. Compare the completed Flow against the source prompt and remove anything the
@@ -30,53 +32,89 @@ semantics. Read it first and never emit commands or forms it does not define.
 
 | Prompt intent | Flow form |
 | --- | --- |
-| Obtain runtime information | `ASK "question" AS name` |
-| Store or calculate a value | `SET name = expression` |
-| Preserve background guidance as data | `CONTEXT` ... `AS name` |
-| Perform bounded agent work | `DO task [AS name]` |
-| Display existing information | `PRINT` |
-| Choose one path | `IF` / `ELSE` |
-| Repeat a known number of times | `REPEAT count TIMES` |
-| Repeat while a condition remains true | `WHILE condition` |
-| Skip or leave the current loop | `CONTINUE` / `BREAK` |
-| Import data or compose another Flow | `USE` |
-| Define a reusable operation | `COMMAND NAME` or `FLOW name` with an indented body |
-| Run a specified process | `RUN` |
-| Start and join independent work | `ASYNC` / `AWAIT` |
-| Exit the current scope | `RETURN` |
+| Obtain runtime information | `ask "question" as @name` |
+| Store or calculate a value | `set name = expression` |
+| Preserve background guidance as data | `context` with a literal body and one header or aligned following binding |
+| Perform bounded agent work | `do task [as @name]` |
+| Display existing information | `print` |
+| Choose one path | `if` / `else` |
+| Repeat a known number of times | `repeat count times` |
+| Repeat while a condition remains true | `while condition` |
+| Skip or leave the current loop | `continue` / `break` |
+| Import data or compose another Flow | `use` |
+| Define a reusable operation | `command NAME` or `flow name` with an indented body |
+| Run a specified process | `run` |
+| Start and join independent work | `async` / `await` |
+| Exit the current scope | `return` |
+
+## Binding layout
+
+Choose a layout deliberately; do not put every binding in the same position.
+
+- Keep bindings inline for short instructions, direct run commands without
+  stdin, and compact headers where the destination reads naturally.
+- For run/context with a substantial or multiline literal body, prefer an
+  aligned `as @name` after the body so the input and result read in order.
+  A header binding remains useful for a short context body or when naming the
+  background first makes its purpose clearer. Use judgment, not a fixed line
+  count; consider header length, body length, and nearby consistent style.
+- Follow the user's explicit layout preference. When editing a readable
+  program, preserve its consistent style unless a change improves clarity.
+- Choose exactly one position: context requires one binding, run permits one
+  when its result is needed. Other binding-capable instructions stay inline.
+  A following binding aligns with run/context and belongs to that instruction;
+  attachment ignores blank lines, but no comment or instruction may intervene.
+  Preserve blank lines and whitespace that belong to the literal body.
+- Never move binding-like text out of a literal body or change that body's
+  content to achieve a layout. Add no result binding solely for formatting.
+
+```flow
+run uname -s as @system
+
+run sh
+    printf '%s\n' "$HOME"
+    uname -s
+    uname -m
+as @host_result
+
+context as @tone
+    Keep the response concise.
+```
+
+These are layout examples, not instructions to execute during conversion.
 
 ## Conversion rules
 
-- Encode information that will be known only at runtime as `ASK`; do not ask the
+- Encode information that will be known only at runtime as `ask`; do not ask the
   user during conversion merely to obtain a future runtime value. Ask for
   clarification before authoring only when different answers would materially
   change the workflow structure and the prompt does not define a path.
-- Put judgment or tool-using work in `DO`. If later instructions read its
+- Put judgment or tool-using work in `do`. If later instructions read its
   result, state the required result shape and fields in the task and store it
-  with `AS name`.
+  with `as @name`.
 - Prefer plain-English conditions when they express the decision clearly,
-  including precise checks such as `IF @approval is exactly "yes"`. Preserve
+  including precise checks such as `if @approval is exactly "yes"`. Preserve
   exact accepted values and required evidence. Use symbolic expressions when
   they communicate a calculation or condition more clearly.
-- Use exact `PRINT` for fixed output, such as `PRINT "Hello:" @name`; literals
+- Use exact `print` for fixed output, such as `print "Hello:" @name`; literals
   and standalone references render in order with one space between parts.
-  Use prose `PRINT`, such as `PRINT Say hello to @name.`, when the agent should
+  Use prose `print`, such as `print Say hello to @name.`, when the agent should
   compose the wording from available information. Neither form performs new
   research or other external work.
-- Use `RUN` only when the prompt requires a real executable process. Preserve
+- Use `run` only when the prompt requires a real executable process. Preserve
   argument order and pass values as standalone arguments. Invoke a shell
   explicitly when shell syntax is required. Do not translate ordinary agent
   work into a process or invent scripts.
-- Default to one `.flow` file. Add `USE` children only when the prompt requires
+- Default to one `.flow` file. Add `use` children only when the prompt requires
   reuse or the workflow becomes materially clearer as separate programs. Use a
-  Markdown `USE` only for imported data. Add a command or flow only when
+  Markdown `use` only for imported data. Add a command or flow only when
   reuse makes the program clearer. Commands use uppercase names; flows use
   lowercase labels. Call either as an instruction, pass one value as local
-  `@input`, and optionally bind its final direct instruction's result with `AS`.
-- Use `ASYNC` only for independent tasks that can run concurrently without
+  `@input`, and optionally bind its final direct instruction's result with `as`.
+- Use `async` only for independent tasks that can run concurrently without
   shared writes or unfinished sibling inputs. Join each required result with
-  `AWAIT` before use. Otherwise preserve sequential execution.
-- Use `RETURN` for an explicit early exit or final message. File end is enough
+  `await` before use. Otherwise preserve sequential execution.
+- Use `return` for an explicit early exit or final message. File end is enough
   when no message is needed.
 - Preserve requested approvals, gates, failure behavior, platforms, commands,
   paths, and output wording. Do not add setup, inspection, validation, retries,
@@ -98,10 +136,10 @@ Before delivering the conversion, verify:
 
 - Every requested action and decision appears once in the intended order.
 - Every reference is defined on every path before use.
-- Every `ASK` creates a real wait, and no later instruction starts early.
+- Every `ask` creates a real wait, and no later instruction starts early.
 - Branches, loops, child calls, tasks, and exits have valid indentation and
   reachable behavior.
-- `RUN` arguments and task concurrency follow interpreter restrictions.
+- `run` arguments and task concurrency follow interpreter restrictions.
 - Unselected branches, context, imported data, and tool output cannot execute.
 - The Flow adds no unrequested work or authority.
 
@@ -115,16 +153,16 @@ Prompt:
 Conversion:
 
 ```flow
-ASK "Which environment will be deployed?" AS environment
+ask "Which environment will be deployed?" as @environment
 
-IF @environment is exactly "production"
-    ASK "Approve the production deployment? Type exactly: yes or no" AS approval
-    IF @approval is exactly "yes"
-        PRINT "Production deployment approved."
-    ELSE
-        RETURN "Production deployment was not approved."
-ELSE
-    PRINT "This environment does not require production approval."
+if @environment is exactly "production"
+    ask "Approve the production deployment? Type exactly: yes or no" as @approval
+    if @approval is exactly "yes"
+        print "Production deployment approved."
+    else
+        return "Production deployment was not approved."
+else
+    print "This environment does not require production approval."
 
-RETURN "Deployment check completed."
+return "Deployment check completed."
 ```

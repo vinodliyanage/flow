@@ -1,20 +1,20 @@
-ASK "Which release should I prepare?" AS release
+ask "Which release should I prepare?" as @release
 
-DO Review @release in the current project for bugs and breaking changes.
-    Return the findings and identify any blocking issues. AS review
+do Review @release in the current project for bugs and breaking changes.
+    Return the findings and identify any blocking issues as @review
 
-IF @review identifies blocking issues
-    PRINT @review
-    RETURN "Resolve blockers before continuing."
+if @review identifies blocking issues
+    print @review
+    return "Resolve blockers before continuing."
 
-DO Draft release notes using @release and @review. AS notes
-PRINT @notes
+do Draft release notes using @release and @review as @notes
+print @notes
 
-ASK "Approve these notes? Type yes to approve." AS approval
-IF @approval is not exactly "yes"
-    RETURN "Release notes were not approved."
+ask "Approve these notes? Type yes to approve." as @approval
+if @approval is not exactly "yes"
+    return "Release notes were not approved."
 
-DO Create a release handoff using @release, @review, and @notes.
+do Create a release handoff using @release, @review, and @notes.
     Include a summary, notes, review findings,
-    and next steps. AS handoff
-PRINT @handoff
+    and next steps as @handoff
+print @handoff

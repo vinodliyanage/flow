@@ -1,68 +1,67 @@
 {
-  "ASK for input": {
-    "prefix": "ASK",
-    "body": "ASK \"${1:Question?}\" AS ${2:answer}$0",
+  "ask for input": {
+    "prefix": "ask",
+    "body": "ask \"${1:Question?}\" as @${2:answer}$0",
     "description": "Ask a question, wait for a fresh reply, and store the answer."
   },
-  "DO a task": {
-    "prefix": "DO",
-    "body": "DO ${1:Describe the task.} AS ${2:result}$0",
+  "do a task": {
+    "prefix": "do",
+    "body": "do ${1:Describe the task} as @${2:result}$0",
     "description": "Complete an agent task and store its result."
   },
-  "PRINT a value": {
-    "prefix": "PRINT",
-    "body": "PRINT ${1:@result}$0",
+  "print a value": {
+    "prefix": "print",
+    "body": "print ${1:@result}$0",
     "description": "Display an existing value or exact expression."
   },
-  "PRINT an instruction": {
-    "prefix": "PRINT",
-    "body": "PRINT ${1:Summarize @result.}$0",
+  "print an instruction": {
+    "prefix": "print",
+    "body": "print ${1:Summarize @result.}$0",
     "description": "Compose a response from information already available."
   },
-  "IF a condition": {
-    "prefix": "IF",
+  "if a condition": {
+    "prefix": "if",
     "body": [
-      "IF ${1:@answer is exactly \"yes\"}",
-      "    ${2:PRINT \"Approved.\"}",
+      "if ${1:@answer is exactly \"yes\"}",
+      "    ${2:print \"Approved.\"}",
       "$0"
     ],
     "description": "Run an indented body when the condition is true."
   },
-  "IF / ELSE branches": {
-    "prefix": "IF",
+  "if / else branches": {
+    "prefix": "if",
     "body": [
-      "IF ${1:@answer is exactly \"yes\"}",
-      "    ${2:PRINT \"Approved.\"}",
-      "ELSE",
-      "    ${3:RETURN \"Not approved.\"}",
+      "if ${1:@answer is exactly \"yes\"}",
+      "    ${2:print \"Approved.\"}",
+      "else",
+      "    ${3:return \"Not approved.\"}",
       "$0"
     ],
-    "description": "Choose between two branches with aligned IF and ELSE."
+    "description": "Choose between two branches with aligned if and else."
   },
-  "CONTEXT background text": {
-    "prefix": "CONTEXT",
+  "context background text": {
+    "prefix": "context",
     "body": [
-      "CONTEXT",
-      "    ${1:Background guidance.}",
-      "AS ${2:guidelines}",
+      "context as @${1:guidelines}",
+      "    ${2:Background guidance.}",
       "$0"
     ],
-    "description": "Store literal background text in an aligned AS binding."
+    "description": "Store literal background text using a same-line as @name binding."
   },
-  "FLOW definition": {
-    "prefix": "FLOW",
+  "flow definition": {
+    "prefix": "flow",
     "body": [
-      "FLOW ${1:name}",
-      "    DO ${2:Describe the task for @input and return its result.}",
+      "flow ${1:name}",
+      "    do ${2:Describe the task for @input and return its result.}",
       "$0"
     ],
     "description": "Define a reusable flow with a lowercase label and isolated @input."
   },
-  "COMMAND definition": {
-    "prefix": "COMMAND",
+  "command definition": {
+    "prefix": "command",
     "body": [
-      "COMMAND ${1:NAME}",
-      "    DO ${2:Describe the task for @input and return its result.}",
+      "command ${1:NAME}",
+      "    do ${2:Describe the task for @input and return its result.}",
       "$0"
     ],
     "description": "Group instructions in a plain command block with isolated @input."

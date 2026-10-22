@@ -1,12 +1,12 @@
-ASK "Which pull request or local diff should I review?" AS target
+ask "Which pull request or local diff should I review?" as @target
 
-DO Read @target and the code needed to understand the change.
-    Review correctness, regressions, and test coverage. AS review
+do Read @target and the code needed to understand the change.
+    Review correctness, regressions, and test coverage as @review
 
-IF @review identifies blocking issues
-    PRINT Explain the blockers in @review, with file references and suggested fixes.
-    RETURN "Resolve the blockers before requesting approval."
+if @review identifies blocking issues
+    print Explain the blockers in @review, with file references and suggested fixes.
+    return "Resolve the blockers before requesting approval."
 
-DO Draft a reviewer summary from @target and @review.
-    Include the changed behavior, risks, and verification gaps. AS summary
-PRINT @summary
+do Draft a reviewer summary from @target and @review.
+    Include the changed behavior, risks, and verification gaps as @summary
+print @summary
