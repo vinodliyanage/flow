@@ -1,51 +1,51 @@
-FLOW score_priority
-    IF @input is exactly "high"
-        SET score = 3
-    ELSE
-        IF @input is exactly "medium"
-            SET score = 2
-        ELSE
-            SET score = 1
-    DO Return @score unchanged.
+flow score_priority
+    if @input is exactly "high"
+        set score = 3
+    else
+        if @input is exactly "medium"
+            set score = 2
+        else
+            set score = 1
+    do Return @score unchanged.
 
-COMMAND READ_TASK
-    ASK "What is the task?" AS title
-    WHILE @title is empty or contains only whitespace
-        ASK "Please enter a task name." AS title
+command READ_TASK
+    ask "What is the task?" as @title
+    while @title is empty or contains only whitespace
+        ask "Please enter a task name." as @title
 
-    ASK "How many minutes will it take? Enter a whole number from 1 to 120." AS estimate
-    WHILE @estimate does not contain only decimal digits representing a number from 1 to 120
-        ASK "Please enter a whole number from 1 to 120 using digits only." AS estimate
-    DO Convert the decimal digits in @estimate to an integer. AS minutes
+    ask "How many minutes will it take? Enter a whole number from 1 to 120." as @estimate
+    while @estimate does not contain only decimal digits representing a number from 1 to 120
+        ask "Please enter a whole number from 1 to 120 using digits only." as @estimate
+    do Convert the decimal digits in @estimate to an integer as @minutes
 
-    ASK "What is its priority? Enter high, medium, or low." AS priority
-    WHILE @priority is not exactly one of "high", "medium", or "low"
-        ASK "Please enter exactly high, medium, or low in lowercase." AS priority
+    ask "What is its priority? Enter high, medium, or low." as @priority
+    while @priority is not exactly one of "high", "medium", or "low"
+        ask "Please enter exactly high, medium, or low in lowercase." as @priority
 
-    score_priority @priority AS score
-    DO Return an object with fields title from @title, minutes from @minutes,
+    score_priority @priority as @score
+    do Return an object with fields title from @title, minutes from @minutes,
         priority from @priority, and score from @score.
 
-PRINT "Let's plan three tasks."
-SET tasks = []
-SET total_minutes = 0
-SET task_number = 1
+print "Let's plan three tasks."
+set tasks = []
+set total_minutes = 0
+set task_number = 1
 
-REPEAT 3 TIMES
-    PRINT "Task" @task_number "of 3"
-    READ_TASK AS task
-    DO Return a new list containing all items in @tasks followed by @task. AS tasks
-    SET total_minutes = @total_minutes + @task.minutes
-    SET task_number = @task_number + 1
+repeat 3 times
+    print "Task" @task_number "of 3"
+    READ_TASK as @task
+    do Return a new list containing all items in @tasks followed by @task as @tasks
+    set total_minutes = @total_minutes + @task.minutes
+    set task_number = @task_number + 1
 
-DO Sort @tasks by score from highest to lowest, then minutes from lowest to highest.
-    Preserve entry order when both values match. AS ordered_tasks
+do Sort @tasks by score from highest to lowest, then minutes from lowest to highest.
+    Preserve entry order when both values match as @ordered_tasks
 
-PRINT Write a numbered plan using only @ordered_tasks.
+print Write a numbered plan using only @ordered_tasks.
     Show each task's title, priority, and estimated minutes.
-PRINT "Total estimated minutes:" @total_minutes
+print "Total estimated minutes:" @total_minutes
 
-IF @total_minutes is greater than 120
-    PRINT "This plan exceeds two hours. Consider moving a lower-priority task to another session."
-ELSE
-    PRINT "This plan fits within two hours."
+if @total_minutes is greater than 120
+    print "This plan exceeds two hours. Consider moving a lower-priority task to another session."
+else
+    print "This plan fits within two hours."

@@ -1,12 +1,12 @@
-COMMAND GREET
-    IF @input is exactly "Ana"
-        DO Return the exact string "Welcome back, Ana." AS greeting
-    ELSE
-        DO Write a short greeting for @input. AS greeting
-    DO Return @greeting unchanged.
+command GREET
+    if @input is exactly "Ana"
+        do Return the exact string "Welcome back, Ana." as @greeting
+    else
+        do Write a short greeting for @input as @greeting
+    do Return @greeting unchanged.
 
-ASK "What is your name?" AS name
-WHILE @name is an empty string
-    ASK "Please enter a name." AS name
-GREET @name AS greeting
-PRINT @greeting
+ask "What is your name?" as @name
+while @name is an empty string
+    ask "Please enter a name." as @name
+GREET @name as @greeting
+print @greeting

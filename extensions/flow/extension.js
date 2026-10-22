@@ -53,14 +53,8 @@ function findUseReferences(text, markdown = false) {
     }
 
     const indent = line.match(/^ */)[0].length;
-    if (literal) {
-      if (literal.command === 'CONTEXT') {
-        if (indent === literal.indent && /^ *AS +[a-z][a-z0-9_]* *$/.test(line)) {
-          literal = null;
-        }
-        continue;
-      }
-      if (!line.trim() || indent >= literal.indent + 4) continue;
+    if (literal !== null) {
+      if (!line.trim() || indent >= literal + 4) continue;
       literal = null;
     }
     if (triple) {
@@ -79,19 +73,19 @@ function findUseReferences(text, markdown = false) {
       continue;
     }
     if (comment || /^ *#/.test(line)) continue;
-    const block = line.match(/^ *(CONTEXT|RUN)\b/);
+    const block = line.match(/^ *(?:context(?: +as +@[a-z][a-z0-9_]*)? *$|run\b)/);
     if (block) {
-      literal = { command: block[1], indent };
+      literal = indent;
       continue;
     }
-    if (/^ *(?:DO|PRINT) +\S/.test(line)) {
+    if (/^ *(?:do|print) +\S/.test(line)) {
       continuation = indent;
       triple = scanTripleQuotes(line);
       continue;
     }
 
-    const flow = line.match(/^( *USE +)(.+\.flow) *$/);
-    const guidance = line.match(/^( *USE +)(.+?\.md)(#[^\r\n]+?)? +AS +[a-z][a-z0-9_]* *$/);
+    const flow = line.match(/^( *use +)(.+\.flow) *$/);
+    const guidance = line.match(/^( *use +)(.+?\.md)(#[^\r\n]+?)? +as +@[a-z][a-z0-9_]* *$/);
     const use = flow || guidance;
     if (!use) {
       triple = scanTripleQuotes(line);

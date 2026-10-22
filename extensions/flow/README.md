@@ -1,55 +1,57 @@
 # Flow
 
-Syntax highlighting, indentation, command snippets, and USE file navigation
+Syntax highlighting, indentation, command snippets, and `use` file navigation
 for Flow in Cursor and VS Code. The language specification is
-`docs/specification.md` at the repository root (Flow 0.3.0).
+`docs/specification.md` at the repository root (Flow 0.4.0).
 Supports `.flow` files and Markdown `flow` fences. It does not execute, validate,
 or format programs.
 
-Commands: `ASK SET DO PRINT CONTEXT USE IF ELSE REPEAT WHILE CONTINUE BREAK RETURN RUN ASYNC AWAIT COMMAND FLOW`.
-Bindings use `AS name`; references use `@name.field`. Define uppercase commands
-with `COMMAND NAME` and named flows with `FLOW name`, using a lowercase label.
-Both have indented bodies. Calls use `NAME value AS result` or `name value AS result`.
-Blocks use four spaces without colons. CONTEXT/RUN bodies and
-`###` comments remain literal; USE-like text inside them creates no file links.
+Commands: `ask set do print context use if else repeat while continue break return run async await command flow`.
+Flow 0.4.0 uses lowercase keywords and `as @name` bindings; references
+use `@name.field`. For `run` and `context`, place the binding on the header
+or after the body aligned with the command. Other result bindings stay inline. Define uppercase commands
+with `command NAME` and named flows with `flow name`, using a lowercase label.
+Both have indented bodies. Calls use `NAME value as @result` or `name value as @result`.
+Blocks use four spaces without colons. `context`/`run` bodies and
+`###` comments remain literal; text resembling `use` inside them creates no file links.
 Raw triple-quoted strings (`"""..."""`) preserve multiline text without interpolation,
 escapes, comment parsing, or file links.
 Declared labels, `@references`, and callable names have distinct default
-colors. `FLOW` uses bold emerald (`#34D399`) to mark reusable subflow definitions.
+colors. `flow` uses bold emerald (`#34D399`) to mark reusable subflow definitions.
 Only quoted strings use the same `#98C379` green as the documentation;
-literal CONTEXT and RUN bodies keep the editor's normal text color. All defaults
+literal `context` and `run` bodies keep the editor's normal text color. All defaults
 remain overridable by the active theme.
 
 ## Install
 
 Run **Extensions: Install from VSIX...** and choose
-`skills/flow/assets/flow-0.3.2.vsix` from the repository root, or:
+`skills/flow/assets/flow-0.4.0.vsix` from the repository root, or:
 
 ```sh
-cursor --install-extension /absolute/path/to/flow/skills/flow/assets/flow-0.3.2.vsix
+cursor --install-extension /absolute/path/to/flow/skills/flow/assets/flow-0.4.0.vsix
 ```
 
 Reload the window if open files have not refreshed. `.flow` uses **Flow** language
-mode; Markdown keeps Markdown mode. Command-click (macOS) or Ctrl-click opens USE
+mode; Markdown keeps Markdown mode. Command-click (macOS) or Ctrl-click opens `use`
 references relative to the containing file, including Markdown guidance files.
 Colors follow the extension defaults and any user theme overrides.
 
 ## Writing a Flow file
 
 In **Flow** language mode, indentation defaults to four spaces. Block
-rules indent after headers such as `IF`, `ELSE`, `REPEAT`, `COMMAND`, and
-`FLOW`. Explicit user or workspace settings can override these defaults;
+rules indent after headers such as `if`, `else`, `repeat`, `command`, and
+`flow`. Explicit user or workspace settings can override these defaults;
 no settings files are changed.
 
-Type `ASK`, `DO`, `PRINT`, `IF`, `CONTEXT`, `COMMAND`, or `FLOW` and use
+Type `ask`, `do`, `print`, `if`, `context`, `command`, or `flow` and use
 **Trigger Suggest**, or open **Insert Snippet** in the Command Palette.
 Select a template, then press Tab to
-move through its editable fields. `PRINT` offers value and prose forms; `IF`
-offers one branch or `IF`/`ELSE`. Templates are starting points, not automatically
+move through its editable fields. `print` offers value and prose forms; `if`
+offers one branch or `if`/`else`. Templates are starting points, not automatically
 executed programs.
 
 Snippets and four-space defaults apply to `.flow` files, not Markdown. Markdown
-Flow fences retain their existing highlighting and USE navigation. There is no
+Flow fences retain their existing highlighting and `use` navigation. There is no
 formatter, validation, or binding-aware autocomplete in this version.
 
 ## Develop

@@ -2,7 +2,7 @@
   "name": "flow",
   "displayName": "Flow",
   "description": "Flow syntax highlighting, four-space editing, command snippets, and USE navigation.",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "publisher": "vinodliyanage",
   "author": "Vinod Liyanage",
   "icon": "images/icon.png",

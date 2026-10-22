@@ -72,8 +72,8 @@ test('instruction grammar uses valid W3C-style EBNF and defines every referenced
   }
   assert.deepEqual([...usedCategories].sort(), [...categories].sort());
   assert.deepEqual([...literals].sort(), [
-    '=', 'AS', 'ASK', 'ASYNC', 'AWAIT', 'BREAK', 'COMMAND', 'CONTEXT', 'CONTINUE',
-    'DO', 'ELSE', 'FLOW', 'IF', 'PRINT', 'REPEAT', 'RETURN', 'RUN', 'SET', 'TIMES', 'USE', 'WHILE'
+    '=', '@', 'as', 'ask', 'async', 'await', 'break', 'command', 'context', 'continue',
+    'do', 'else', 'flow', 'if', 'print', 'repeat', 'return', 'run', 'set', 'times', 'use', 'while'
   ].sort());
 });
 
@@ -81,21 +81,18 @@ test('notation checker rejects empty alternatives, malformed groups and unsuppor
   for (const expression of ['', 'name |', '(name', 'name)', 'name??', 'name;']) {
     assert.throws(() => parseExpression(expression), undefined, expression);
   }
-  assert.deepEqual([...parseExpression('"AS" NAME').references], ['NAME']);
+  assert.deepEqual([...parseExpression('"as" "@" NAME').references], ['NAME']);
   assert.deepEqual([...parseExpression('(name | "value")?').literals], ['value']);
 });
 
-test('COMMAND declarations stay plain and replace the footer form', () => {
+test('command declarations use names and indented instruction bodies', () => {
   const grammar = specification.match(/```ebnf\n([\s\S]*?)\n```/)[1];
-  assert.match(grammar, /^command +::= "COMMAND" COMMAND_NAME BLOCK$/m);
-  assert.ok(!grammar.includes('"AS" "COMMAND"'));
-  assert.match(specification, /AS COMMAND footers are replaced/);
+  assert.match(grammar, /^command +::= "command" COMMAND_NAME BLOCK$/m);
   const example = fs.readFileSync(path.join(__dirname,
     '../../../examples/command-blocks.flow'), 'utf8');
-  assert.match(example, /^COMMAND GREET$/m);
-  assert.ok(!/^ *AS COMMAND\b/m.test(example));
+  assert.match(example, /^command GREET$/m);
   assert.ok(!/<[a-z_]+:[a-z_]+>/.test(example));
-  for (const line of example.split('\n').filter(line => /^ *(IF|WHILE)\b/.test(line))) {
+  for (const line of example.split('\n').filter(line => /^ *(if|while)\b/.test(line))) {
     assert.ok(!/==|!=/.test(line), line);
   }
 });
@@ -105,4 +102,21 @@ test('the public instruction grammar matches the agent interpreter contract', ()
     '../../../docs/specification.md'), 'utf8');
   const grammar = source => source.match(/```ebnf\n([\s\S]*?)\n```/)[1];
   assert.equal(grammar(published), grammar(specification));
+});
+
+test('Flow 0.4 permits one header or aligned following binding for literal bodies', () => {
+  const grammar = specification.match(/```ebnf\n([\s\S]*?)\n```/)[1];
+  assert.match(grammar, /^binding +::= "as" "@" NAME$/m);
+  assert.match(grammar, /^context +::= "context" \(binding LITERAL \| LITERAL binding\)$/m);
+  assert.match(grammar, /^run +::= "run" ARGV \(binding LITERAL\? \| LITERAL\? binding\?\)$/m);
+  assert.ok(!/"[A-Z]+"/.test(grammar), 'uppercase keyword terminals must not survive');
+  assert.match(specification, /Keywords are lowercase and case-sensitive/);
+  assert.match(specification, /Use one position, never both, even with the same destination/);
+  assert.match(specification, /aligned binding is part of that instruction, not a separate instruction/);
+  assert.match(specification, /Other binding-capable forms keep inline bindings/);
+  const skill = fs.readFileSync(path.join(__dirname, '../../../skills/flow/SKILL.md'), 'utf8');
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+  assert.match(specification, /contract for Flow 0\.4\.0/);
+  assert.match(skill, /version: "0\.4\.0"/);
+  assert.equal(manifest.version, '0.4.0');
 });
