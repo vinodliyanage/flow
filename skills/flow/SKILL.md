@@ -3,20 +3,10 @@ name: flow
 description: Author, review, validate, or execute Flow; convert prompts; set up Flow in Cursor or VS Code.
 metadata:
   author: "Vinod Liyanage"
-  version: "0.4.0"
+  version: "0.5.0"
 ---
 
 # Flow
-
-Execute Flow literally. After preflight, maintain a current file and instruction
-pointer. Complete each reached instruction before advancing. Preloading, batching,
-skipping, and reordering are execution errors.
-
-print completes only after its output is emitted as a separate user-visible
-intermediate assistant message, using the commentary channel where available.
-Emit it before executing any subsequent instruction or tool call. Then continue
-without waiting for a reply. Buffering, combining, or replaying print output in
-the final answer is an execution error.
 
 Read the complete current [interpreter](references/interpreter.md) before Flow
 work. Stop if unavailable/incomplete; reload after context loss. Never substitute
