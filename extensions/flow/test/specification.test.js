@@ -111,12 +111,12 @@ test('Flow 0.4 permits one header or aligned following binding for literal bodie
   assert.match(grammar, /^run +::= "run" ARGV \(binding LITERAL\? \| LITERAL\? binding\?\)$/m);
   assert.ok(!/"[A-Z]+"/.test(grammar), 'uppercase keyword terminals must not survive');
   assert.match(specification, /Keywords are lowercase and case-sensitive/);
-  assert.match(specification, /Use one position, never both, even with the same destination/);
-  assert.match(specification, /aligned binding is part of that instruction, not a separate instruction/);
-  assert.match(specification, /Other binding-capable forms keep inline bindings/);
+  assert.match(specification, /never use both positions/);
+  assert.match(specification, /Parse the complete instruction, body, and\s+binding before acting/);
+  assert.match(specification, /Bindings end the complete input inline, including do continuations\. Only\s+run\/context also permit one aligned binding/);
   const skill = fs.readFileSync(path.join(__dirname, '../../../skills/flow/SKILL.md'), 'utf8');
   const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
   assert.match(specification, /contract for Flow 0\.4\.0/);
-  assert.match(skill, /version: "0\.4\.0"/);
+  assert.match(skill, /version: "0\.5\.0"/);
   assert.equal(manifest.version, '0.4.0');
 });
