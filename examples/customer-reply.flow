@@ -5,17 +5,20 @@ context as @guidelines
 
 ask "Paste the customer's message." as @message
 if @message is an empty string
-    return "A customer message is required."
+    print "A customer message is required."
+    return
 
 ask "Paste the policy or product information relevant to this request." as @policy
 if @policy is an empty string
-    return "Relevant policy or product information is required."
+    print "Relevant policy or product information is required."
+    return
 
 do Assess @message using @policy and @guidelines as @assessment
 
 if @assessment requires a decision that @policy does not cover
     print Explain which decisions in @assessment need a human answer.
-    return "A human decision is required before drafting a reply."
+    print "A human decision is required before drafting a reply."
+    return
 
 do Draft a customer reply using @message, @policy, @assessment, and @guidelines as @reply
 print @reply

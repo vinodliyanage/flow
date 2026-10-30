@@ -5,7 +5,8 @@ do Read @target and the code needed to understand the change.
 
 if @review identifies blocking issues
     print Explain the blockers in @review, with file references and suggested fixes.
-    return "Resolve the blockers before requesting approval."
+    print "Resolve the blockers before requesting approval."
+    return
 
 do Draft a reviewer summary from @target and @review.
     Include the changed behavior, risks, and verification gaps as @summary

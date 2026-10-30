@@ -1,15 +1,15 @@
 flow add_one
-    set result = @input + 1
+    return @input + 1
 
 command ADD_TWO
     add_one @input as @first
     add_one @first as @second
-    set result = @second
+    return @second
 
 flow add_three
     ADD_TWO @input as @first
     add_one @first as @second
-    set result = @second
+    return @second
 
 add_one 4 as @next
 print @next

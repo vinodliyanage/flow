@@ -10,7 +10,7 @@ defines the shared syntax, values, scopes, and execution rules.
 
 In signatures, angle brackets name placeholders and square brackets mark
 optional parts. Do not type those brackets. `body` means indented instructions;
-`literal body` means text that Flow does not execute. Flow 0.4.0 keywords are
+`literal body` means text that Flow does not execute. Flow 0.7.0 keywords are
 lowercase and case-sensitive. A trailing `as @name` writes a simple destination;
 elsewhere `@name` reads an existing value.
 
@@ -32,7 +32,7 @@ elsewhere `@name` reads an existing value.
 | [run](#run) | Launch a direct process. |
 | [async](#async) | Start an independent background task. |
 | [await](#await) | Join a task and expose its bindings. |
-| [return](#return) | Exit the current invocation. |
+| [return](#return) | Exit the current invocation, optionally returning a value. |
 | [Custom command call](#custom-command-call) | Invoke a registered command or flow with optional input. |
 
 ## ask
@@ -203,7 +203,8 @@ ask "Proceed? Type yes or no." as @answer
 if @answer is exactly "yes"
     print "Proceeding."
 else
-    return "Cancelled."
+    print "Cancelled."
+    return
 ```
 
 **Result:** no branch result is specified; body instructions may update shared
@@ -308,6 +309,15 @@ The target determines the operation:
 | Markdown file or heading section | Read text as data. | Text stored in the required `as` binding. |
 | `.flow` file | Read, validate, and run the child synchronously. Reached declarations register reusable bodies. | Caller and child share bindings and callable registrations. |
 
+Leading top-level `use` instructions form the file import header. Flow loads
+that header once in source order. Its bindings and callable registrations are
+available to every command and flow declared in the file; each invocation gets
+an isolated copy of the imported bindings. Put the header before the first
+non-`use` declaration or instruction.
+
+Elsewhere, `use` is dynamic. Flow loads it only when execution reaches that
+instruction in the current scope, so an unselected branch does not import it.
+
 Paths are literal and resolve from the containing program's directory. `use`
 does not change the process working directory. Read a child only when the
 instruction is reached. Missing files, ambiguous Markdown sections, and recursive
@@ -337,15 +347,16 @@ level and may appear alongside ordinary instructions.
 
 ```flow
 command ADD_TWO
-    set result = @input + 2
+    return @input + 2
 
 ADD_TWO 3 as @total
 print @total
 ```
 
 **Result:** registration produces none. A call receives isolated local `@input`
-and may expose its final direct instruction's result. Duplicate or built-in
-names, nested definitions, and direct or indirect recursion fail.
+and may expose an explicit returned value or its final direct instruction's
+result. Duplicate or built-in names, nested definitions, and direct or indirect
+recursion fail.
 
 ## flow
 
@@ -360,7 +371,7 @@ Call its label as a standalone instruction; flow calls are not expressions.
 
 ```flow
 flow add_one
-    set result = @input + 1
+    return @input + 1
 
 add_one 4 as @next
 print @next
@@ -471,31 +482,33 @@ await calculation
 print @calculation.total
 ```
 
-**Result:** the task's bindings become accessible; `await` takes no `as` suffix.
-An unknown task is an error. A known task failure stops ordinary scheduling.
-`await` is prohibited inside an `async` body.
+**Result:** the task's bindings become accessible; an explicit return value is
+available as `@calculation.result`. `await` takes no `as` suffix. An unknown task
+is an error. A known task failure stops ordinary scheduling. `await` is prohibited
+inside an `async` body.
 
 ## return
 
 ```text
-return [<message>]
+return [<expression>]
 ```
 
-Exit the current invocation normally, optionally displaying a message. Reaching
-file end has the same effect as a message-free `return`.
+Evaluate the optional expression once, exit the current invocation normally,
+and supply its value without displaying it. Reaching file end has the same
+effect as a bare `return` unless a callable's final direct instruction supplies
+a result.
 
 ```flow
 print "Before return."
-return "Finished."
+return {"status": "finished"}
 ```
 
-**Result:** no returned data. In the root program, `return` ends the run; in an
-ordinary child, it resumes the caller; in a task, command, or flow, it exits
-only that scope. Outstanding tasks settle before a scope exits.
-
-Use a string message, or omit it. A message displayed by `return` is not a
-command or flow's return value. A message-free `return` and normal file end
-are silent.
+**Result:** the object is returned without being displayed. In the root program,
+it becomes the program result available to the host; in an ordinary child, it
+resumes the caller and discards the value; in a command or flow, it supplies the
+call result; in a task, it becomes the task's `result` field after `await`.
+Outstanding tasks settle before a scope exits. Use `print` before `return` when
+the user must see a message.
 
 ## Custom command call
 
@@ -506,15 +519,17 @@ are silent.
 
 Reach a definition directly or through `use`, then pass an optional expression
 as local `@input`. Evaluate it once in the caller; omitted input is `null`.
-The invocation has isolated bindings and inherited callable registrations.
-With `as @name`, its final direct instruction must produce a result to store in
-the caller. Without `as`, discard the result.
+The invocation has isolated copies of its defining file imports, local `@input`,
+and inherited callable registrations.
+With `as @name`, an explicit `return` value or the final direct instruction's
+result is stored in the caller. Without `as`, discard the result.
 
 In `trim.flow`:
 
 ```flow
 command TRIM
-    do Remove surrounding whitespace from @input and return the resulting string.
+    do Remove surrounding whitespace from @input as @trimmed
+    return @trimmed
 ```
 
 In the caller beside `trim.flow`:
@@ -525,9 +540,10 @@ TRIM "  Ana  " as @name
 print @name
 ```
 
-**Result:** the final direct instruction's result, optionally stored in the caller.
-A final `if`, `print`, or explicit `return` provides no result; a bound call
-ending this way fails instead of reusing an earlier value.
+**Result:** the explicit returned value, or otherwise the final direct
+instruction's result, is optionally stored in the caller. A bare `return`, final
+`if`, or final `print` provides no result; a bound call ending this way fails
+instead of reusing an earlier value.
 Unknown names, duplicate definitions, built-in name collisions, and recursive
 calls are errors. See [custom-command scope](reuse.md#custom-commands) before
 building larger definitions.

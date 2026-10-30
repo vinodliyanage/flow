@@ -8,7 +8,7 @@ Flow is a language for writing the steps an agent should follow. You describe
 the work in ordinary language and use commands to make its order, decisions,
 and pauses explicit.
 
-These guides describe Flow 0.4.0.
+These guides describe Flow 0.7.0.
 
 ## From a prompt to a Flow program
 

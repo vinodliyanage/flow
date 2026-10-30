@@ -18,11 +18,11 @@ claim that every implementation decision has been resolved.
 
 ## Language version
 
-This documentation describes **Flow v0.4.0**, with lowercase keywords and
+This documentation describes **Flow v0.7.0**, with lowercase keywords and
 `as @name` result bindings. Only `run` and `context` also accept an aligned
 binding after their literal body.
-The Flow skill and editor extension have their own package versions; those are
-separate from the language version.
+The language, interpreter, and skill share this version. The editor extension
+has its own version, managed separately.
 
 ## 1. Notation and terms
 
@@ -218,7 +218,7 @@ flow        ::= "flow" NAME BLOCK
 run         ::= "run" ARGV (binding LITERAL? | LITERAL? binding?)
 async       ::= "async" NAME BLOCK
 await       ::= "await" NAME
-return      ::= "return" STRING?
+return      ::= "return" EXPRESSION?
 call        ::= (COMMAND_NAME | NAME) EXPRESSION? binding?
 ```
 
@@ -227,8 +227,9 @@ Definitions belong at file or selected-block top level and may appear beside
 ordinary instructions.
 `run` permits an absent stdin body; its optional `as @name` ends the header
 or follows any body on an aligned line. `context` requires its binding in one
-of these positions. `return` permits an optional string message and
-supplies no returned data.
+of these positions. `return` permits one optional expression. It evaluates
+that expression once, exits the current scope, and supplies its value without
+displaying it. A bare `return` supplies no value.
 
 ### print form selection and output
 
@@ -273,14 +274,14 @@ For `name = "Ana"`, `print "Hello:" @name` displays exactly `Hello: Ana`.
 | `command` / `flow` | Register a reusable body without executing it. |
 | `run` | Launch a direct process, pass literal stdin, and wait for exit. |
 | `async` | Start an independent body with an isolated snapshot of bindings. |
-| `await` | Join a known task successfully and expose its bindings. |
-| `return` | Exit only the current invocation or task, optionally displaying a message. |
+| `await` | Join a known task successfully and expose its bindings, including an explicit returned value as `result`. |
+| `return` | Evaluate an optional expression, exit the current invocation or task, and supply its value without displaying it. The root value is the program result available to the host. |
 | Command/flow call | Invoke a registered definition with isolated locals and one local `@input` value; omitted input is `null`. |
 
 The [command reference](commands.md) provides complete signatures, command
 restrictions, and examples. `continue` and `break` outside a local loop are
-errors. A `return` message is output, not returned data. File end behaves as a
-message-free `return`.
+errors. Use `print` for user-visible output. File end behaves as a bare
+`return` unless the final direct instruction supplies a callable result.
 
 ## 8. Execution and validation
 
@@ -295,8 +296,8 @@ successful result, then advance exactly once. Only written control flow may
 change the next instruction. Never skip, combine, reorder, anticipate, or
 invent instructions. Unselected branches do not execute.
 
-Display only `print` output, `ask` questions, explicit `return` messages, and
-required error or permission reports. Results and process output stay internal
+Display only `print` output, `ask` questions, and required error or permission
+reports. Results and process output stay internal
 unless displayed. Add no progress, pause, resume, location, or completion
 narration. Wait silently after asking; normal file end is silent. Higher-priority
 host requirements still apply.
@@ -324,16 +325,28 @@ new Flow instructions.
 | Scope | Bindings |
 | --- | --- |
 | Root program | Current root bindings. |
+| Leading file imports | Loaded once in source order; their bindings and registrations are captured by callables declared in that file. |
 | Branch or loop | Shared surrounding bindings. |
 | Ordinary `use` child | Shared caller bindings. |
-| Command or flow | Isolated bindings, with the argument available as `@input`; inherited callable registrations. |
-| `async` task | Isolated binding and registration snapshots taken at launch. |
-| Successful `await` | Task bindings readable as `@task_name.field`. |
+| Command or flow | Isolated copies of its file imports, with the argument available as `@input`; inherited callable registrations. |
+| `async` task | Isolated binding and registration snapshots taken at launch. An explicit return value becomes its `result` field, replacing a task-local field with that name. |
+| Successful `await` | Task bindings and an explicit returned `result` readable as `@task_name.field`. |
 
 Ordinary children execute synchronously and resume their caller at `return`
 or file end. Paths resolve relative to the containing file. They do not change
 the host process working directory or grant permissions. Missing files and
 recursive imports are errors.
+
+A leading run of top-level `use` instructions is the file import header. Load
+that header once per file load, in source order, before the file's remaining
+declarations and instructions. Its Markdown bindings and callable registrations
+are available to every command and flow declared in that file. Each invocation
+receives an isolated copy, so replacing one does not mutate the file import.
+Place file imports before the first non-`use` declaration or instruction.
+
+A `use` outside the leading file header is dynamic. Load it only when execution
+reaches it in the current scope. This includes imports inside commands, flows,
+conditions, and loops; an unselected path does not load them.
 
 Markdown `use` stores the file's text. A `#section` suffix selects a heading:
 lowercase its text and replace runs of spaces with hyphens, retaining other
@@ -344,10 +357,11 @@ Markdown Flow blocks never execute.
 
 Definitions are registered without executing their bodies. A call evaluates
 its optional input in the caller once; omitted input becomes local `null`.
-Its final direct instruction supplies the result. `set` and `do` can produce
-results; a final `if`, `print`, or explicit `return` supplies none. A bound call
-without a final result fails instead of reusing an earlier result. An unbound
-call discards the result. Invocation locals and registrations are discarded.
+An explicit `return` expression supplies the result; otherwise the final direct
+instruction may supply it. A bare `return`, final `if`, or final `print` supplies
+none. A bound call without a result fails instead of reusing an earlier result.
+An unbound call discards the result. Invocation locals and registrations are
+discarded.
 Commands and flows can call each other, but recursion is an error.
 Calls require registration when reached. Unknown or duplicate definitions,
 built-in collisions, empty bodies, and nested definitions are errors.

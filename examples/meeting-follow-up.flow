@@ -5,7 +5,8 @@ context as @guidelines
 
 ask "Paste the meeting notes." as @notes
 if @notes is an empty string
-    return "Meeting notes are required."
+    print "Meeting notes are required."
+    return
 
 do Extract decisions and action items from @notes following @guidelines as @actions
 

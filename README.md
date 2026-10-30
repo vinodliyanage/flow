@@ -37,14 +37,16 @@ do Review @release in the current project for bugs and breaking changes.
 
 if @review identifies blocking issues
     print @review
-    return "Resolve blockers before continuing."
+    print "Resolve blockers before continuing."
+    return
 
 do Draft release notes using @release and @review as @notes
 print @notes
 
 ask "Approve these notes? Type yes to approve." as @approval
 if @approval is not exactly "yes"
-    return "Release notes were not approved."
+    print "Release notes were not approved."
+    return
 
 do Create a release handoff using @release, @review, and @notes.
     Include a summary, notes, review findings,
@@ -61,26 +63,28 @@ Agents interpret programs using the Flow skill in `skills/flow/` and its
 complete interpreter contract. This repository does not provide a standalone
 runtime; natural-language task results still depend on agent judgment.
 
-Flow **0.4.0** uses lowercase keywords and `as @name` result bindings.
+Flow **0.7.0** uses lowercase keywords and `as @name` result bindings.
 For `run` and `context`, bind on the header or after the body on an aligned
 line; other result bindings stay inline.
+Leading top-level `use` instructions are file imports available to every command
+and flow in that file. A `use` inside executable logic remains dynamic.
 Custom command names are uppercase; named flows use lowercase labels:
 
 ```flow
 flow add_one
-    set result = @input + 1
+    return @input + 1
 
 command ADD_TWO
     add_one @input as @first
     add_one @first as @second
-    set result = @second
+    return @second
 
 ADD_TWO 3 as @total
 print @total
 ```
 
-Both forms receive isolated local `@input` and can expose their final direct
-instruction's result with `as`. `async name` retains its existing task-body
+Both forms receive isolated local `@input` and can return an explicit value
+with `as`. `async name` retains its existing task-body
 syntax. See [reusing programs](docs/reuse.md) and the
 [interactive quiz](examples/functions-quiz.flow).
 
