@@ -5,7 +5,7 @@ description: Learn Flow indentation, bindings, strings, plain-English conditions
 # Syntax and values
 
 A Flow program combines command keywords, ordinary task text, and values.
-This guide explains how to read and write those parts in Flow 0.4.0. For the
+This guide explains how to read and write those parts in Flow 0.7.0. For the
 formal forms and known specification gaps, see the [language specification](specification.md).
 
 ## Instructions and indentation
@@ -13,7 +13,8 @@ formal forms and known specification gaps, see the [language specification](spec
 ```flow
 ask "What is your name?" as @name
 if @name is an empty string
-    return "A name is required."
+    print "A name is required."
+    return
 print @name
 ```
 

@@ -4,10 +4,43 @@ description: Reuse guidance and workflows with use, share bindings with child pr
 
 # Reusing programs
 
-`use` lets a program read Markdown or run a child program. Reached `command`
-and `flow` declarations register reusable bodies without executing them.
-The file is loaded when execution reaches `use`. Relative paths are
-resolved from the file containing that instruction.
+`use` lets a program read Markdown or run a child program. A leading run of
+top-level `use` instructions is the file import header. Flow loads that header
+once in source order, and commands and flows declared in the file inherit its
+bindings and callable registrations. Put it before every other declaration or
+instruction.
+
+A `use` anywhere else is dynamic. Flow loads it only when execution reaches it
+in the current scope. Relative paths resolve from the file containing the
+instruction.
+
+## Share guidance across flows
+
+```flow
+use guidelines.md as @guidelines
+
+flow greet
+    do Write a short greeting following @guidelines as @greeting
+    return @greeting
+```
+
+The Markdown file is read once when this Flow file loads. Every call to `greet`
+starts with an isolated copy of `@guidelines`. Replacing that local copy does not
+change the file import or another invocation.
+
+Use a runtime import when the path depends on the selected path:
+
+```flow
+flow load_rules
+    if @input is exactly "oqg"
+        use oqg.md as @rules
+    else
+        use qci.md as @rules
+
+    return @rules
+```
+
+Only the selected Markdown file is loaded.
 
 ## Read background guidance
 
@@ -70,7 +103,8 @@ and keep its own bindings. Create `trim.flow`:
 
 ```flow
 command TRIM
-    do Remove surrounding whitespace from @input and return the resulting string.
+    do Remove surrounding whitespace from @input as @trimmed
+    return @trimmed
 ```
 
 In a caller beside it:
@@ -87,10 +121,11 @@ executing the body. Command names start with an uppercase letter and contain
 uppercase letters, digits, or underscores. A file can contain several definitions
 alongside ordinary instructions.
 
-Calling `TRIM` supplies one value as local `@input`. Its bindings are isolated
-from the caller. With `as @trimmed_name`, the final direct instruction must
-produce a result. The example uses a final `do`, whose output is explicit.
-`return` displays a message and exits; it is not a return-value statement.
+Calling `TRIM` supplies one value as local `@input`. It receives isolated copies
+of its defining file imports, and its other bindings remain isolated from the
+caller. With `as @trimmed_name`, an explicit `return` value or the final direct
+instruction's result is stored in the caller. `return` does not display its
+value; use `print` for user-visible output.
 
 Unknown calls, duplicate definitions, built-in name collisions, empty or nested
 definitions, and recursive calls fail. Ordinary children share callable
@@ -106,25 +141,27 @@ definitions through `use`:
 
 ```flow
 flow add_one
-    set result = @input + 1
+    return @input + 1
 
 command ADD_TWO
     add_one @input as @first
     add_one @first as @second
-    set result = @second
+    return @second
 
 ADD_TWO 3 as @total
 print @total
 ```
 
 This program displays `5`. The command calls a flow twice, each time with
-isolated local bindings. Commands and flows may call each other.
+isolated copies of its file imports and isolated local bindings. Commands and
+flows may call each other.
 Omitted input becomes local `null`. Calls are standalone instructions, so
 write `add_one 3 as @next`, rather than placing a call inside `set`.
 
-A successful final direct `set` or `do` supplies a result. A final `if`, `print`,
-or explicit `return` does not. Binding a call with no final result is an error;
-earlier results are not reused. `as` stores a result only after success.
+An explicit `return` value supplies the result; otherwise a successful final
+direct `set` or `do` can supply it. A bare `return`, final `if`, or final `print`
+does not. Binding a call with no result is an error; earlier results are not
+reused. `as` stores a result only after success.
 
 Flow labels start with a lowercase letter and contain lowercase letters,
 digits, or underscores. Bare labels call flows; `@name` reads a binding.
@@ -137,8 +174,8 @@ Task bodies can call reusable flows, subject to the task restrictions.
 | --- | --- | --- |
 | Markdown `use` | A task needs saved guidance. | Stores text in one binding. |
 | Ordinary child | Several steps form part of the same workflow. | Shares caller bindings. |
-| Command or flow | A reusable operation needs its own locals. | Receives local `@input`; optionally returns its final direct result. |
-| `async` task | Independent work can run in the background. | Receives a snapshot; exposes results after `await`. |
+| Command or flow | A reusable operation needs its own locals. | Receives local `@input`; optionally returns an explicit value or final direct result. |
+| `async` task | Independent work can run in the background. | Receives a snapshot; exposes bindings and an explicit returned `result` after `await`. |
 
 Keep a workflow in one file until reuse makes its path easier to understand.
 See [execution and failures](execution.md) for background-task behavior.

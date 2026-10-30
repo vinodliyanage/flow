@@ -6,14 +6,14 @@ flow get_question
             set question = {"prompt": "Which number is even? a) 7 b) 9 c) 12", "answer": "c"}
         else
             set question = {"prompt": "How many sides does a triangle have? a) 3 b) 4 c) 5", "answer": "a"}
-    set result = @question
+    return @question
 
 flow score_answer
     if @input.given is exactly @input.expected
         set points = 1
     else
         set points = 0
-    set result = @points
+    return @points
 
 command ASK_QUESTION
     print @input.prompt
@@ -28,7 +28,7 @@ command ASK_QUESTION
         print "Correct!"
     else
         print "The correct answer is:" @input.answer
-    set result = @points
+    return @points
 
 print "Quick quiz: three questions, one point for each correct answer."
 set score = 0

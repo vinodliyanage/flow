@@ -1,20 +1,23 @@
 ask "Describe the bug and how to reproduce it." as @report
 if @report is an empty string
-    return "A bug report is required."
+    print "A bug report is required."
+    return
 
 do Investigate @report in the current project.
     Record the evidence, likely cause, and any uncertainty as @diagnosis
 
 if @diagnosis cannot identify a cause supported by evidence
     print Explain what is missing from @diagnosis and what to investigate next.
-    return "More evidence is needed before proposing a fix."
+    print "More evidence is needed before proposing a fix."
+    return
 
 do Propose the smallest fix supported by @diagnosis as @proposal
 print @proposal
 
 ask "Apply this fix? Type yes to approve." as @approval
 if @approval is not exactly "yes"
-    return "No fix was applied."
+    print "No fix was applied."
+    return
 
 do Apply only the approved fix in @proposal as @change
 do Run the existing checks relevant to @change and record their actual results as @verification

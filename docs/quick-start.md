@@ -39,7 +39,8 @@ Create `hello.flow` in your workspace:
 ```flow
 ask "What is your name?" as @name
 if @name is an empty string
-    return "A name is required."
+    print "A name is required."
+    return
 
 print "Hello:" @name
 
@@ -53,8 +54,9 @@ else
 `ask` stores your reply as text. `if` reads that text and chooses a branch.
 Its condition can be an ordinary English sentence, including an exact text check.
 `print "Hello:" @name` displays the text and your answer in one message,
-separated by a space. `return` exits early with a message; reaching the end
-of the file also finishes the program.
+separated by a space. `return` exits early without displaying its optional
+value; `print` handles messages. Reaching the end of the file also finishes the
+program.
 
 When you want the agent to compose the wording, `print` also accepts an
 instruction:

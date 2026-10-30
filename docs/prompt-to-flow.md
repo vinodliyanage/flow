@@ -32,7 +32,8 @@ if @environment is exactly "production"
     if @approval is exactly "yes"
         print "Production deployment approved."
     else
-        return "Production deployment was not approved."
+        print "Production deployment was not approved."
+        return
 else
     print "This environment does not require production approval."
 
@@ -59,7 +60,7 @@ other than exactly `production`.
 | Reuse a program or read Markdown | `use` |
 | Launch a specified executable | `run` |
 | Start independent concurrent work and join it | `async` / `await` |
-| Exit this invocation | `return` |
+| Exit this invocation or return a value | `return` |
 
 Use an `as` binding only when later work needs the value. If a task returns an
 object, name the required fields and their types in the `do` instruction.

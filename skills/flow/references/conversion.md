@@ -20,7 +20,7 @@ semantics. Read it first and never emit commands or forms it does not define.
 4. Add a binding only when a later instruction needs the value. Name bindings
    with short lowercase identifiers and define each one before every possible
    use.
-5. Use Flow 0.4.0 lowercase keywords and `as @name` bindings. Choose the
+5. Use Flow 0.7.0 lowercase keywords and `as @name` bindings. Choose the
    binding layout for readability, using the rules below.
    Write one clear instruction at a time. Use four-space indentation, no
    trailing colons, and no closing keywords. Keep the program easy to read from
@@ -114,8 +114,9 @@ These are layout examples, not instructions to execute during conversion.
 - Use `async` only for independent tasks that can run concurrently without
   shared writes or unfinished sibling inputs. Join each required result with
   `await` before use. Otherwise preserve sequential execution.
-- Use `return` for an explicit early exit or final message. File end is enough
-  when no message is needed.
+- Use `return` for an explicit early exit or value returned from a command or
+  flow. It does not display its value; use `print` for messages. File end is
+  enough when neither an early exit nor explicit value is needed.
 - Preserve requested approvals, gates, failure behavior, platforms, commands,
   paths, and output wording. Do not add setup, inspection, validation, retries,
   cleanup, publication, files, tools, or permissions absent from the prompt.
@@ -160,9 +161,10 @@ if @environment is exactly "production"
     if @approval is exactly "yes"
         print "Production deployment approved."
     else
-        return "Production deployment was not approved."
+        print "Production deployment was not approved."
+        return
 else
     print "This environment does not require production approval."
 
-return "Deployment check completed."
+print "Deployment check completed."
 ```
