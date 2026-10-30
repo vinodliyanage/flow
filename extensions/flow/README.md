@@ -2,12 +2,12 @@
 
 Syntax highlighting, indentation, command snippets, and `use` file navigation
 for Flow in Cursor and VS Code. The language specification is
-`docs/specification.md` at the repository root (Flow 0.4.0).
+`docs/specification.md` at the repository root (Flow 0.7.0).
 Supports `.flow` files and Markdown `flow` fences. It does not execute, validate,
 or format programs.
 
 Commands: `ask set do print context use if else repeat while continue break return run async await command flow`.
-Flow 0.4.0 uses lowercase keywords and `as @name` bindings; references
+Flow 0.7.0 uses lowercase keywords and `as @name` bindings; references
 use `@name.field`. For `run` and `context`, place the binding on the header
 or after the body aligned with the command. Other result bindings stay inline. Define uppercase commands
 with `command NAME` and named flows with `flow name`, using a lowercase label.
@@ -25,10 +25,10 @@ remain overridable by the active theme.
 ## Install
 
 Run **Extensions: Install from VSIX...** and choose
-`skills/flow/assets/flow-0.4.0.vsix` from the repository root, or:
+`skills/flow/assets/flow-0.5.0.vsix` from the repository root, or:
 
 ```sh
-cursor --install-extension /absolute/path/to/flow/skills/flow/assets/flow-0.4.0.vsix
+cursor --install-extension /absolute/path/to/flow/skills/flow/assets/flow-0.5.0.vsix
 ```
 
 Reload the window if open files have not refreshed. `.flow` uses **Flow** language

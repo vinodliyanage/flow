@@ -60,7 +60,7 @@ test('built-in command scopes require lowercase keywords', () => {
     ask: 'ask "Name?" as @name', set: 'set count = 0', do: 'do Review @name. as @result',
     print: 'print @result', context: 'context as @background', use: 'use common.flow', if: 'if true',
     else: 'else', repeat: 'repeat 0 times', while: 'while false', continue: 'continue',
-    break: 'break', return: 'return "Done"', run: 'run python3 - @name',
+    break: 'break', return: 'return @result', run: 'run python3 - @name',
     async: 'async frontend', await: 'await frontend', command: 'command GREET',
     flow: 'flow greet'
   };
@@ -415,7 +415,8 @@ test('branch and literal snippets preserve Flow structure', () => {
     'if ${1:@answer is exactly "yes"}',
     '    ${2:print "Approved."}',
     'else',
-    '    ${3:return "Not approved."}',
+    '    ${3:print "Not approved."}',
+    '    return',
     '$0'
   ]);
   assert.deepEqual(snippets['context background text'].body, [
@@ -425,17 +426,19 @@ test('branch and literal snippets preserve Flow structure', () => {
   assert.equal(snippets['print an instruction'].body, 'print ${1:Summarize @result.}$0');
   assert.deepEqual(snippets['command definition'].body, [
     'command ${1:NAME}',
-    '    do ${2:Describe the task for @input and return its result.}', '$0'
+    '    do ${2:Describe the task for @input.} as @result',
+    '    return @result', '$0'
   ]);
   assert.deepEqual(snippets['flow definition'].body, [
     'flow ${1:name}',
-    '    do ${2:Describe the task for @input and return its result.}', '$0'
+    '    do ${2:Describe the task for @input.} as @result',
+    '    return @result', '$0'
   ]);
 });
 
 test('named flow calls highlight as instructions while task labels and data keep their scopes', () => {
   const source = [
-    'flow add_one', '    set result = @input + 1',
+    'flow add_one', '    return @input + 1',
     'command INCREMENT', '    add_one @input as @result', '    set output = @result',
     'add_one 4 as @next', 'async preview', '    add_one 9 as @result',
     'await preview', 'print @preview.result',

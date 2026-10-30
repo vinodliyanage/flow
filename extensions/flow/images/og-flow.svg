@@ -20,7 +20,7 @@
     <text x="643" y="207"><tspan fill="#61afef">do</tspan> Review <tspan fill="#9cdcfe">@release</tspan> for blockers. as @review</text>
     <text x="643" y="245"><tspan fill="#e06c75">if</tspan> <tspan fill="#9cdcfe">@review</tspan> identifies blocking issues</text>
     <text x="675" y="274"><tspan fill="#f0d060">print</tspan> <tspan fill="#9cdcfe">@review</tspan></text>
-    <text x="675" y="303"><tspan fill="#ff5370">return</tspan> <tspan fill="#98c379">"Resolve blockers first."</tspan></text>
+    <text x="675" y="303"><tspan fill="#f0d060">print</tspan> <tspan fill="#98c379">"Resolve blockers first."</tspan></text>
     <text x="643" y="350"><tspan fill="#f0d060">print</tspan> Summarize <tspan fill="#9cdcfe">@review</tspan> for the team.</text>
     <text x="643" y="398"><tspan fill="#56b6c2">ask</tspan> <tspan fill="#98c379">"Prepare the handoff?"</tspan> as @approval</text>
     <text x="643" y="436"><tspan fill="#e06c75">if</tspan> <tspan fill="#9cdcfe">@approval</tspan> is exactly <tspan fill="#98c379">"yes"</tspan></text>

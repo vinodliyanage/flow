@@ -118,7 +118,7 @@ test('Flow 0.7.0 permits one header or aligned following binding for literal bod
   const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
   assert.match(specification, /contract for Flow 0\.7\.0/);
   assert.match(skill, /version: "0\.7\.0"/);
-  assert.equal(manifest.version, '0.4.0');
+  assert.equal(manifest.version, '0.5.0');
 });
 
 test('Flow 0.7.0 return accepts an optional expression without displaying it', () => {
