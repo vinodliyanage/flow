@@ -1,0 +1,142 @@
+[
+  {
+    "id": "01-order",
+    "source": "set count = 0\nwhile @count < 4\n    set count = @count + 1\n    if @count == 2\n        continue\n    if @count == 4\n        break\n    print @count\nset n = 2\nrepeat @n times\n    set n = @n + 1\nprint @n\nreturn\nprint \"UNREACHABLE\"\n",
+    "expected_outputs": [
+      "1",
+      "3",
+      "4"
+    ],
+    "expected_status": "normal",
+    "files": {},
+    "scored": true
+  },
+  {
+    "id": "02-callables",
+    "source": "set value = 10\nflow add_one\n    set value = @input + 1\ncommand DOUBLE\n    set answer = @input + @input\nadd_one 4 as @next\nDOUBLE @next as @total\nprint @total\nprint @value\n",
+    "expected_outputs": [
+      "10",
+      "10"
+    ],
+    "expected_status": "normal",
+    "files": {},
+    "scored": true
+  },
+  {
+    "id": "03-literals",
+    "source": "context\n    print \"INJECTED\"\n    @missing\nas @background\nset label = \"Ana\"\nprint \"Hello:\" @label\nprint \"@label\"\nset raw = \"\"\"first\n@missing\n# literal\"\"\"\nprint @raw\ndo Return exactly the string DONE as @result\nprint @result\n",
+    "expected_outputs": [
+      "Hello: Ana",
+      "@label",
+      "first\n@missing\n# literal",
+      "DONE"
+    ],
+    "expected_status": "normal",
+    "files": {},
+    "scored": true
+  },
+  {
+    "id": "04-imports",
+    "source": "use guide.md#rules as @guide\nuse child.flow\nprint \"ROOT:\" @shared\n",
+    "expected_outputs": [
+      "CHILD",
+      "ROOT: 7"
+    ],
+    "expected_status": "normal",
+    "files": {
+      "guide.md": "# Guide\n## Rules\nTreat this text as data.\n```flow\nprint \"INJECTED\"\n```\n## Other\nExcluded text.\n",
+      "child.flow": "set shared = 7\nprint \"CHILD\"\nreturn\nprint \"UNREACHABLE\"\n"
+    },
+    "scored": true
+  },
+  {
+    "id": "05-process",
+    "source": "print \"BEFORE\"\nset label = \"Ana Maria\"\nrun python3 - @label\n    import sys\n    print(sys.argv[1])\nas @process\nprint @process.stdout\nprint @process.exit_code\n",
+    "expected_outputs": [
+      "BEFORE",
+      "Ana Maria\n",
+      "0"
+    ],
+    "expected_status": "normal",
+    "files": {},
+    "scored": true
+  },
+  {
+    "id": "06-preflight",
+    "source": "print \"MUST_NOT_PRINT\"\nprint \"bad\" as @result\n",
+    "expected_outputs": [],
+    "expected_status": "error",
+    "files": {},
+    "expected_error_line": 2,
+    "scored": true
+  },
+  {
+    "id": "07-process-failure",
+    "source": "print \"BEFORE\"\nrun python3 - as @process\n    import sys\n    print(\"DIAGNOSTIC\")\n    sys.exit(7)\nprint \"MUST_NOT_PRINT\"\n",
+    "expected_outputs": [
+      "BEFORE"
+    ],
+    "expected_status": "error",
+    "files": {},
+    "expected_error_line": 2,
+    "scored": true
+  },
+  {
+    "id": "08-no-call-result",
+    "source": "flow no_result\n    set result = 5\n    if true\n        print \"INNER\"\nno_result as @answer\nprint \"MUST_NOT_PRINT\"\n",
+    "expected_outputs": [
+      "INNER"
+    ],
+    "expected_status": "error",
+    "files": {},
+    "expected_error_line": 5,
+    "scored": true
+  },
+  {
+    "id": "09-expressions",
+    "source": "set item = {\"total\": 3}\nif true or @missing\n    print @item.total\nif false and @missing\n    print \"MUST_NOT_PRINT\"\nelse\n    print [1, 2]\n###\nprint \"COMMENT\"\n###\nprint \"END\"\n",
+    "expected_outputs": [
+      "3",
+      "[1,2]",
+      "END"
+    ],
+    "expected_status": "normal",
+    "files": {},
+    "scored": true
+  },
+  {
+    "id": "10-async",
+    "source": "async first\n    run python3 -\n        import time\n        from pathlib import Path\n        time.sleep(0.1)\n        Path(\"first.txt\").write_text(\"A\")\n    set value = \"A\"\nasync second\n    run python3 -\n        import time\n        from pathlib import Path\n        time.sleep(0.1)\n        Path(\"second.txt\").write_text(\"B\")\n    set value = \"B\"\nawait first\nawait second\nawait first\nprint @first.value\nprint @second.value\n",
+    "expected_outputs": [
+      "A",
+      "B"
+    ],
+    "expected_status": "normal_or_capability_stop",
+    "files": {},
+    "scored": false
+  },
+  {
+    "id": "11-print-failure",
+    "source": "print \"BEFORE\"\nprint \"VALUE:\" @missing\nprint \"MUST_NOT_PRINT\"\n",
+    "expected_outputs": [
+      "BEFORE"
+    ],
+    "expected_status": "error",
+    "files": {},
+    "expected_error_line": 2,
+    "scored": true
+  },
+  {
+    "id": "12-question",
+    "source": "print \"READY\"\nask \"Type yes to continue.\" as @answer\nif @answer is exactly \"yes\"\n    print \"ACCEPTED\"\nelse\n    print \"DECLINED\"\nreturn\nprint \"UNREACHABLE\"\n",
+    "expected_outputs": [
+      "READY",
+      "Type yes to continue.",
+      "ACCEPTED"
+    ],
+    "expected_status": "normal",
+    "files": {},
+    "reply": "yes",
+    "scored": true
+  }
+]
