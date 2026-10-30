@@ -1,0 +1,39 @@
+# Collect three expenses and compare their total with a budget.
+# Change the budget below to use your preferred amount and currency units.
+
+command READ_EXPENSE
+    ask "What did you spend money on?" as @title
+    while @title is empty or contains only whitespace
+        ask "Please enter an expense name." as @title
+
+    ask "How much did it cost? Enter a whole number from 1 to 100000 using digits only." as @amount_text
+    while @amount_text does not contain only decimal digits representing a number from 1 to 100000
+        ask "Please enter a whole number from 1 to 100000 using digits only." as @amount_text
+
+    do Convert the decimal digits in @amount_text to an integer as @amount
+    do Return an object with fields title from @title and amount from @amount.
+
+set budget = 100
+set expenses = []
+set total = 0
+set expense_number = 1
+
+print "Let's record three expenses. Use the same currency units for every amount."
+print "Your budget is:" @budget
+
+repeat 3 times
+    print "Expense" @expense_number "of 3"
+    READ_EXPENSE as @expense
+    do Return a new list containing all items in @expenses followed by @expense as @expenses
+    set total = @total + @expense.amount
+    set expense_number = @expense_number + 1
+
+print Write a numbered summary using only @expenses, showing each title and amount.
+print "Total spent:" @total
+
+if @total > @budget
+    set difference = @total - @budget
+    print "You are over budget by:" @difference
+else
+    set remaining = @budget - @total
+    print "Your remaining budget is:" @remaining
