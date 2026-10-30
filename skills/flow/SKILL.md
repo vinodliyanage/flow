@@ -1,6 +1,6 @@
 ---
 name: flow
-description: Author, review, validate, or execute Flow; convert prompts; set up Flow in Cursor or VS Code.
+description: Author, review, validate, or execute Flow; convert prompts; bake Flow into another skill; set up Flow in Cursor or VS Code.
 metadata:
   author: "Vinod Liyanage"
   version: "0.5.0"
@@ -13,6 +13,7 @@ work. Stop if unavailable/incomplete; reload after context loss. Never substitut
 memory, examples, or summaries.
 
 For prompt conversion, also read [conversion](references/conversion.md).
+For baking Flow into another skill, also read [baking](references/baking.md).
 For editor setup, also read [extension setup](references/extension-setup.md).
 Load these guides only for their corresponding tasks.
 
