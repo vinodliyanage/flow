@@ -34,7 +34,8 @@
       "if ${1:@answer is exactly \"yes\"}",
       "    ${2:print \"Approved.\"}",
       "else",
-      "    ${3:return \"Not approved.\"}",
+      "    ${3:print \"Not approved.\"}",
+      "    return",
       "$0"
     ],
     "description": "Choose between two branches with aligned if and else."
@@ -52,7 +53,8 @@
     "prefix": "flow",
     "body": [
       "flow ${1:name}",
-      "    do ${2:Describe the task for @input and return its result.}",
+      "    do ${2:Describe the task for @input.} as @result",
+      "    return @result",
       "$0"
     ],
     "description": "Define a reusable flow with a lowercase label and isolated @input."
@@ -61,7 +63,8 @@
     "prefix": "command",
     "body": [
       "command ${1:NAME}",
-      "    do ${2:Describe the task for @input and return its result.}",
+      "    do ${2:Describe the task for @input.} as @result",
+      "    return @result",
       "$0"
     ],
     "description": "Group instructions in a plain command block with isolated @input."
