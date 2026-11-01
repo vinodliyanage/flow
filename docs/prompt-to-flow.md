@@ -104,6 +104,8 @@ identify it before presenting a program as equivalent. A future runtime input
 belongs in `ask`; obtain it during authoring only when the answer would change
 the program's structure.
 
-Save one `.flow` file unless reuse materially improves the procedure. Reading
-or converting a prompt does not authorize execution. See
-[your first program](quick-start.md) when you are ready to run one deliberately.
+Save one `.flow` file when the procedure has no separate domain guidance or
+operational boundaries. For a reusable or nontrivial procedure, follow the
+standard [workflow structure](workflow-structure.md). Reading or converting a
+prompt does not authorize execution. See [your first program](quick-start.md)
+when you are ready to run one deliberately.

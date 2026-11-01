@@ -177,5 +177,7 @@ Task bodies can call reusable flows, subject to the task restrictions.
 | Command or flow | A reusable operation needs its own locals. | Receives local `@input`; optionally returns an explicit value or final direct result. |
 | `async` task | Independent work can run in the background. | Receives a snapshot; exposes bindings and an explicit returned `result` after `await`. |
 
-Keep a workflow in one file until reuse makes its path easier to understand.
-See [execution and failures](execution.md) for background-task behavior.
+Keep a short standalone workflow in one file when it has no separate domain
+guidance or operational boundaries. Organize reusable and nontrivial workflows
+using the standard [workflow structure](workflow-structure.md). See
+[execution and failures](execution.md) for background-task behavior.

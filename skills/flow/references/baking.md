@@ -20,7 +20,7 @@ and never authorizes executing the workflow.
    description: Bundled Flow interpreter contract.
    author: "Vinod Liyanage"
    source: "https://github.com/vinodliyanage/flow"
-   version: "0.7.0"
+   version: "0.8.0"
    license: "LICENSE.txt"
    ---
    ```

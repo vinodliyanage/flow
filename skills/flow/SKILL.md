@@ -3,7 +3,7 @@ name: flow
 description: Author, review, validate, or execute Flow; convert prompts; bake Flow into another skill; set up Flow in Cursor or VS Code.
 metadata:
   author: "Vinod Liyanage"
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # Flow
@@ -13,11 +13,13 @@ work. Stop if unavailable/incomplete; reload after context loss. Never substitut
 memory, examples, or summaries.
 
 For prompt conversion, also read [conversion](references/conversion.md).
+For Flow authoring or review, also read
+[workflow structure](references/workflow-structure.md).
 For baking Flow into another skill, also read [baking](references/baking.md).
 For editor setup, also read [extension setup](references/extension-setup.md).
 Load these guides only for their corresponding tasks.
 
-Author Flow 0.7.0 with lowercase keywords and as @name bindings.
+Author Flow 0.8.0 with lowercase keywords and as @name bindings.
 For run/context, use a header binding or an aligned binding after the body;
 other result bindings stay inline. Conversion chooses the clearest layout.
 Place shared `use` instructions in the leading file import header. Keep a `use`

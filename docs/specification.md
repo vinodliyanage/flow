@@ -18,7 +18,7 @@ claim that every implementation decision has been resolved.
 
 ## Language version
 
-This documentation describes **Flow v0.7.0**, with lowercase keywords and
+This documentation describes **Flow v0.8.0**, with lowercase keywords and
 `as @name` result bindings. Only `run` and `context` also accept an aligned
 binding after their literal body.
 The language, interpreter, and skill share this version. The editor extension
