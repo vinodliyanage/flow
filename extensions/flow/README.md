@@ -2,12 +2,12 @@
 
 Syntax highlighting, indentation, command snippets, and `use` file navigation
 for Flow in Cursor and VS Code. The language specification is
-`docs/specification.md` at the repository root (Flow 0.7.0).
+`docs/specification.md` at the repository root (Flow 0.8.0).
 Supports `.flow` files and Markdown `flow` fences. It does not execute, validate,
 or format programs.
 
 Commands: `ask set do print context use if else repeat while continue break return run async await command flow`.
-Flow 0.7.0 uses lowercase keywords and `as @name` bindings; references
+Flow 0.8.0 uses lowercase keywords and `as @name` bindings; references
 use `@name.field`. For `run` and `context`, place the binding on the header
 or after the body aligned with the command. Other result bindings stay inline. Define uppercase commands
 with `command NAME` and named flows with `flow name`, using a lowercase label.

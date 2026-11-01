@@ -63,7 +63,7 @@ Agents interpret programs using the Flow skill in `skills/flow/` and its
 complete interpreter contract. This repository does not provide a standalone
 runtime; natural-language task results still depend on agent judgment.
 
-Flow **0.7.0** uses lowercase keywords and `as @name` result bindings.
+Flow **0.8.0** uses lowercase keywords and `as @name` result bindings.
 For `run` and `context`, bind on the header or after the body on an aligned
 line; other result bindings stay inline.
 Leading top-level `use` instructions are file imports available to every command

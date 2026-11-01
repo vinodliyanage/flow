@@ -10,7 +10,7 @@ defines the shared syntax, values, scopes, and execution rules.
 
 In signatures, angle brackets name placeholders and square brackets mark
 optional parts. Do not type those brackets. `body` means indented instructions;
-`literal body` means text that Flow does not execute. Flow 0.7.0 keywords are
+`literal body` means text that Flow does not execute. Flow 0.8.0 keywords are
 lowercase and case-sensitive. A trailing `as @name` writes a simple destination;
 elsewhere `@name` reads an existing value.
 

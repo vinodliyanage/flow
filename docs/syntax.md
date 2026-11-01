@@ -5,7 +5,7 @@ description: Learn Flow indentation, bindings, strings, plain-English conditions
 # Syntax and values
 
 A Flow program combines command keywords, ordinary task text, and values.
-This guide explains how to read and write those parts in Flow 0.7.0. For the
+This guide explains how to read and write those parts in Flow 0.8.0. For the
 formal forms and known specification gaps, see the [language specification](specification.md).
 
 ## Instructions and indentation

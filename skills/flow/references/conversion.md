@@ -24,7 +24,7 @@ result should be a standalone program or a workflow package.
 4. Add a binding only when a later instruction needs the value. Name bindings
    with short lowercase identifiers and define each one before every possible
    use.
-5. Use Flow 0.7.0 lowercase keywords and `as @name` bindings. Choose the
+5. Use Flow 0.8.0 lowercase keywords and `as @name` bindings. Choose the
    binding layout for readability, using the rules below.
    Write one clear instruction at a time. Use four-space indentation, no
    trailing colons, and no closing keywords. Keep the program easy to read from

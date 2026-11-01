@@ -1,6 +1,6 @@
 # Flow interpreter
 
-Flow is a programming language for agents. This is the agent-interpreted contract for Flow 0.7.0.
+Flow is a programming language for agents. This is the agent-interpreted contract for Flow 0.8.0.
 Apply the grammar, command behaviors, and shared rules together.
 
 ## Grammar

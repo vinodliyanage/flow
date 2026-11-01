@@ -104,7 +104,7 @@ test('the public instruction grammar matches the agent interpreter contract', ()
   assert.equal(grammar(published), grammar(specification));
 });
 
-test('Flow 0.7.0 permits one header or aligned following binding for literal bodies', () => {
+test('Flow 0.8.0 permits one header or aligned following binding for literal bodies', () => {
   const grammar = specification.match(/```ebnf\n([\s\S]*?)\n```/)[1];
   assert.match(grammar, /^binding +::= "as" "@" NAME$/m);
   assert.match(grammar, /^context +::= "context" \(binding LITERAL \| LITERAL binding\)$/m);
@@ -116,12 +116,12 @@ test('Flow 0.7.0 permits one header or aligned following binding for literal bod
   assert.match(specification, /Bindings end the complete input inline, including do continuations\. Only\s+run\/context also permit one aligned binding/);
   const skill = fs.readFileSync(path.join(__dirname, '../../../skills/flow/SKILL.md'), 'utf8');
   const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
-  assert.match(specification, /contract for Flow 0\.7\.0/);
-  assert.match(skill, /version: "0\.7\.0"/);
+  assert.match(specification, /contract for Flow 0\.8\.0/);
+  assert.match(skill, /version: "0\.8\.0"/);
   assert.equal(manifest.version, '0.5.0');
 });
 
-test('Flow 0.7.0 return accepts an optional expression without displaying it', () => {
+test('Flow 0.8.0 return accepts an optional expression without displaying it', () => {
   const grammar = specification.match(/```ebnf\n([\s\S]*?)\n```/)[1];
   assert.match(grammar, /^return +::= "return" EXPRESSION\?$/m);
   assert.match(specification, /Result: the expression value when present, otherwise none\. Do not display it\./);
@@ -129,7 +129,7 @@ test('Flow 0.7.0 return accepts an optional expression without displaying it', (
   assert.doesNotMatch(specification, /explicit return messages/);
 });
 
-test('Flow 0.7.0 supports file imports and dynamic imports', () => {
+test('Flow 0.8.0 supports file imports and dynamic imports', () => {
   assert.match(specification, /leading top-level `use` instructions form the file import header/i);
   assert.match(specification, /captured by every command and flow\s+declared in that file/);
   assert.match(specification, /Each invocation starts with an isolated copy/);
