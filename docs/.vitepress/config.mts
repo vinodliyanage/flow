@@ -140,6 +140,7 @@ export default defineConfig({
       {
         text: 'Guides',
         items: [
+          { text: 'Workflow structure', link: '/workflow-structure' },
           { text: 'Reusing programs', link: '/reuse' },
           { text: 'Execution and failures', link: '/execution' },
           { text: 'Editor setup', link: '/editor-setup' },

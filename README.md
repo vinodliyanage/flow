@@ -88,6 +88,10 @@ with `as`. `async name` retains its existing task-body
 syntax. See [reusing programs](docs/reuse.md) and the
 [interactive quiz](examples/functions-quiz.flow).
 
+For reusable workflows, keep execution in `flows/` and import domain guidance
+from `knowledge/` and operational boundaries from `guardrails/`. See the
+[workflow structure](docs/workflow-structure.md) guide.
+
 Conditions can be ordinary English, such as `if @review identifies blocking
 issues`. Prefer clear sentences when they express the decision naturally;
 exact expressions are available when needed. See the

@@ -13,6 +13,8 @@ work. Stop if unavailable/incomplete; reload after context loss. Never substitut
 memory, examples, or summaries.
 
 For prompt conversion, also read [conversion](references/conversion.md).
+For Flow authoring or review, also read
+[workflow structure](references/workflow-structure.md).
 For baking Flow into another skill, also read [baking](references/baking.md).
 For editor setup, also read [extension setup](references/extension-setup.md).
 Load these guides only for their corresponding tasks.
